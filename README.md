@@ -30,4 +30,4 @@ Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas d
 - Definir el catálogo y la gramática de comandos para crear tareas, asignarlas, cambiar su estado y notificar, incluidas las instrucciones condicionales.
 - Construir la consola y el lenguaje con lexer, parser, AST, tabla de símbolos y validación semántica.
 - Implementar la representación intermedia, dos optimizaciones y el ejecutor. Integrar las acciones con el tablero, la persistencia, las notificaciones y el historial.
-- Preparar las pruebas del lenguaje, la documentación técnica, Docker Compose y el tablero Kanban.
+- Preparar las pruebas del lenguaje, el correo mediante SMTP de pruebas, Docker Compose, la documentación técnica y el tablero Kanban.

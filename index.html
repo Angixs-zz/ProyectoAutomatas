@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="Base de AutoTask para organizar tareas y repartir turnos de fin de semana.">
+  <title>AutoTask · Calendario de tareas</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <script>
+    // Aplicar el tema antes de pintar la página evita un destello claro.
+    let savedTheme;
+    try { savedTheme = localStorage.getItem('autotask-tema'); } catch {}
+    document.documentElement.dataset.theme = ['light', 'dark'].includes(savedTheme)
+      ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  </script>
+  <link rel="stylesheet" href="./styles.css?v=20261101-1">
+  <script type="module" src="./app.js?v=20261101-1"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="AutoTask, inicio"><span class="brand-icon" aria-hidden="true">⌂</span> Auto<span class="brand-light">Task</span><span class="brand-dot">.</span></a>
+    <span class="header-caption">Proyecto integrador de Lenguajes y Autómatas II</span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar modo claro u oscuro"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+    <a class="header-link" href="#rotaciones">Cómo nos organizamos <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main>
+    <div class="workspace">
+    <div class="workspace-content">
+    <section class="intro">
+      <div><p class="eyebrow"><span class="live-dot"></span> AUTOTASK · BASE DEL PROYECTO</p><h1>Una casa limpia.<br><span>Un turno a la vez.</span></h1><p class="intro-copy">Aquí sabemos a quién le toca. Nos repartimos las tareas<br class="desktop-break"> del fin de semana para que todo esté en orden.</p></div>
+      <div class="house-art" aria-hidden="true"><svg viewBox="0 0 260 205" fill="none"><ellipse cx="132" cy="185" rx="105" ry="12" fill="#e7e9dc"/><path d="M64 92 137 38 208 92v88H64Z" fill="#e3e8d3"/><path d="m45 96 92-70 91 70" stroke="#576c42" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M155 180v-57h31v57" fill="#99aa7b"/><rect x="85" y="100" width="43" height="43" rx="7" fill="#fbfcf5"/><path d="M106.5 100v43M85 121.5h43" stroke="#b5c39e" stroke-width="3"/><path d="m54 163 20-42M42 172l15-26 20 10-12 26" fill="#d7b47f"/><path d="m57 146 20 10" stroke="#826747" stroke-width="4"/><path d="M222 40v20m-10-10h20M38 63v12m-6-6h12" stroke="#9cae7f" stroke-width="3" stroke-linecap="round"/><circle cx="203" cy="24" r="3" fill="#d7b47f"/><path d="M215 179v-24m0 12c-13 0-17-10-17-10 13-3 17 10 17 10Zm0-8s0-14 13-17c2 13-13 17-13 17Z" stroke="#7d9266" stroke-width="3" stroke-linejoin="round"/></svg><span class="art-note">Entre todos, se siente hogar.</span></div>
+    </section>
+
+    <section class="upcoming" aria-labelledby="upcoming-heading">
+      <div class="upcoming-heading"><div><p class="eyebrow" id="weekend-label">ESTE FIN DE SEMANA</p><h2 id="upcoming-heading">Cargando turnos…</h2></div><span class="weekend-pill">Sábado o domingo <span aria-hidden="true">↗</span></span></div>
+      <div class="task-grid" id="upcoming-tasks"></div>
+      <div class="upcoming-footer"><span><span class="check-circle" aria-hidden="true">✓</span> Una persona, una tarea por fin de semana.</span><span id="upcoming-swap">Los turnos se actualizan automáticamente.</span></div>
+    </section>
+
+    <section class="calendar-section" aria-labelledby="calendar-heading">
+      <div class="section-heading"><div><p class="eyebrow">PARA ORGANIZARNOS CON TIEMPO</p><h2 id="calendar-heading">Los próximos turnos</h2></div><div class="section-actions"><button class="text-button" id="tasks-button"><span aria-hidden="true">＋</span> Añadir tarea</button><button class="text-button" id="balance-button">Ver reparto <span aria-hidden="true">↗</span></button></div></div>
+      <div class="calendar-panel" id="calendar-panel">
+        <div class="calendar-toolbar"><div class="month-control"><h3 id="month-label" aria-live="polite"></h3><div class="month-buttons"><button class="icon-button" id="previous-month" aria-label="Mes anterior">‹</button><button class="icon-button" id="next-month" aria-label="Mes siguiente">›</button></div><button class="today-button" id="today-button">Hoy</button></div><label class="person-filter"><span>Ver turnos de</span><select id="person-filter"><option value="all">Todos en casa</option></select></label></div>
+        <div class="table-head" id="calendar-head" aria-hidden="true"></div>
+        <div id="calendar-rows" aria-live="polite"></div>
+        <div class="calendar-footer"><span><span class="swap-dot"></span> Ajuste para evitar tareas dobles</span><span id="month-count"></span></div>
+      </div>
+      <div class="calendar-actions"><p>El turno cubre sábado y domingo. Elijan el día que mejor les venga.</p><div><button class="text-button" id="download-button"><span aria-hidden="true">↓</span> Descargar mes (.ics)</button><button class="text-button" id="print-button"><span aria-hidden="true">▤</span> Imprimir</button></div></div>
+      <p class="download-hint" id="download-status" role="status"></p>
+    </section>
+
+    </div>
+    <aside class="configuration" aria-labelledby="configuration-heading">
+      <div class="config-heading"><span class="config-symbol" aria-hidden="true">☷</span><p class="eyebrow">TU COMBINACIÓN</p><h2 id="configuration-heading">Organiza los turnos</h2><p>Elige las personas y las tareas de esta rotación. El calendario se actualiza al instante.</p></div>
+      <fieldset class="config-group"><legend>Personas que participan <span id="config-people-count"></span></legend><div id="config-people" class="config-people"></div></fieldset>
+      <fieldset class="config-group"><legend>Tareas incluidas <span id="config-task-count"></span></legend><div id="config-tasks" class="config-tasks"></div></fieldset>
+      <p id="config-status" class="config-status" role="status" aria-live="polite"></p>
+      <button type="button" id="config-reset" class="config-reset">↶ &nbsp;Restaurar combinación original</button>
+      <p class="config-disclaimer">Estos ajustes solo se guardan en este navegador. Para compartir la misma combinación con todos, habría que publicarla en el sitio.</p>
+    </aside>
+    </div>
+
+    <section class="share-section" aria-labelledby="share-heading">
+      <div class="section-heading"><div><p class="eyebrow">UN MENSAJE Y TODOS ENTERADOS</p><h2 id="share-heading">Aviso listo para el grupo</h2></div><span class="small-note">Menos «¿a quién le toca?»</span></div>
+      <div class="share-panel">
+        <div class="share-controls">
+          <span class="share-symbol" aria-hidden="true">↗</span>
+          <h3>El recordatorio ya está escrito.</h3>
+          <p>Elige uno de los próximos 8 fines de semana. El mensaje incluye las tareas, los responsables y cualquier ajuste.</p>
+          <label for="share-weekend">Fin de semana</label>
+          <select id="share-weekend"></select>
+          <div class="share-actions"><button class="share-button" id="copy-reminder">Copiar aviso</button><a class="share-link" id="whatsapp-reminder" target="_blank" rel="noopener noreferrer">Abrir en WhatsApp <span aria-hidden="true">↗</span></a></div>
+          <p class="share-note">Tú eliges el grupo y envías el mensaje.</p>
+          <p id="share-status" class="share-status" role="status"></p>
+        </div>
+        <div class="message-preview"><label for="reminder-text"><span class="live-dot" aria-hidden="true"></span> VISTA PREVIA DEL MENSAJE</label><textarea id="reminder-text" readonly spellcheck="false"></textarea><span class="message-signature">Hecho para compartir, sin escribirlo de nuevo.</span></div>
+      </div>
+    </section>
+
+    <section class="next-turns-section" aria-labelledby="next-turns-heading">
+      <div class="section-heading"><div><p class="eyebrow">PRÓXIMO TURNO DE CADA UNO</p><h2 id="next-turns-heading">¿Cuándo te toca a ti?</h2></div></div>
+      <div class="next-turns-grid" id="next-turns-grid"></div>
+      <p class="next-turns-note">Cuenta regresiva hasta tu próximo fin de semana de turno, en cualquiera de las tareas.</p>
+    </section>
+
+    <section class="rules-section" id="rotaciones" aria-labelledby="rules-heading">
+      <div class="section-heading"><div><p class="eyebrow">CLARO Y SIN ENREDOS</p><h2 id="rules-heading">Así nos organizamos</h2></div><span class="small-note" id="rules-note">6 personas · 3 tareas · cada fin de semana</span></div>
+      <div class="rules-grid">
+        <article class="rule-card"><span class="rule-number">01 / LAS ROTACIONES</span><h3>Cada quien tiene su turno</h3><div id="rotation-list"></div></article>
+        <article class="rule-card"><span class="rule-number">02 / SIN TAREAS DOBLES</span><h3>Si coinciden, se combinan</h3><p>Si a una persona le tocan dos tareas el mismo fin de semana, una de ellas se adelanta: la siguiente persona de esa rotación la cubre y la persona desplazada recupera su turno el siguiente fin de semana libre.</p><div class="swap-example"><span>Una tarea</span><span aria-hidden="true">⇄</span><span>La siguiente</span></div><p>Nadie pierde ni suma un turno: una persona se adelanta y la otra lo hace después. Al cambiar la combinación se recalcula el calendario completo, también los turnos pasados.</p></article>
+        <article class="rule-card fairness-card"><span class="rule-number">03 / UN REPARTO JUSTO</span><h3>Todos aportamos</h3><p id="fairness-copy">Cada tarea rota solo entre quienes participan. El reparto se mide por tarea.</p><p>Quien no está en una rotación no recibe turnos de esa tarea. Puedes añadir tareas nuevas y el reparto se recalcula sin tareas dobles.</p><div class="start-note"><span aria-hidden="true">⚑</span> Inicio del calendario<br><strong>24 de octubre de 2026</strong></div></article>
+      </div>
+    </section>
+    <noscript><p class="empty-state">Activa JavaScript para ver el calendario y calcular los turnos.</p></noscript>
+  </main>
+  <footer class="site-footer"><a class="brand" href="./">Auto<span class="brand-light">Task</span><span class="brand-dot">.</span></a><span>Menos pendientes. Más hogar.</span><span>Hecho para nuestra casa <span aria-hidden="true">♡</span></span></footer>
+
+  <dialog id="balance-dialog" aria-labelledby="balance-heading">
+    <div class="dialog-heading"><div><p class="eyebrow">CADA TURNO CUENTA</p><h2 id="balance-heading">El reparto, en números</h2></div><button class="icon-button" id="close-dialog" aria-label="Cerrar reparto">×</button></div>
+    <p>Elige un rango de fechas para ver cuántas tareas tiene cada persona. La equidad se mide por tarea, no por el total.</p>
+    <div class="range-controls">
+      <label class="range-field" for="range-from"><span>Desde</span><input type="date" id="range-from" min="2026-10-24" max="2100-12-31"></label>
+      <span class="range-sep" aria-hidden="true">→</span>
+      <label class="range-field" for="range-to"><span>Hasta</span><input type="date" id="range-to" min="2026-10-24" max="2100-12-31"></label>
+    </div>
+    <div class="range-presets" role="group" aria-label="Rangos rápidos">
+      <button type="button" class="range-chip" data-range-preset="default">Primeros 30</button>
+      <button type="button" class="range-chip" data-range-preset="month">Este mes</button>
+      <button type="button" class="range-chip" data-range-preset="six-months">6 meses</button>
+      <button type="button" class="range-chip" data-range-preset="year">1 año</button>
+    </div>
+    <p class="range-summary" id="range-summary" role="status"></p>
+    <div id="balance-table"></div>
+    <p class="dialog-note">El <strong>~</strong> de cada columna indica los turnos que corresponden por persona según esa rotación. Toca <strong>Ver perfil</strong> para revisar el detalle de alguien. Los ajustes pueden mover un turno fuera del rango.</p>
+  </dialog>
+
+  <dialog id="person-dialog" aria-labelledby="person-heading">
+    <div class="dialog-heading"><div><p class="eyebrow">TAREAS EN EL RANGO</p><h2 id="person-heading">Perfil</h2></div><button class="icon-button" id="close-person-dialog" aria-label="Cerrar perfil">×</button></div>
+    <p class="range-summary" id="person-range"></p>
+    <div id="person-profile"></div>
+    <div class="person-actions"><button type="button" class="text-button" id="back-to-balance">← Volver al reparto</button><span class="small-note">Una persona hace como máximo una tarea por fin de semana.</span></div>
+  </dialog>
+
+  <dialog id="tasks-dialog" aria-labelledby="tasks-heading">
+    <div class="dialog-heading"><div><p class="eyebrow">TAREAS DE LA CASA</p><h2 id="tasks-heading">Añadir una tarea</h2></div><button class="icon-button" id="close-tasks-dialog" aria-label="Cerrar tareas">×</button></div>
+    <p>Agrega una tarea y el calendario vuelve a calcular las combinaciones para que nadie haga dos tareas el mismo fin de semana.</p>
+    <div id="task-list" class="task-list"></div>
+    <form id="task-form" class="task-form">
+      <label for="task-name">Nombre de la tarea</label>
+      <input id="task-name" name="name" required maxlength="60" placeholder="Ej. Barrer la cocina" autocomplete="off">
+      <label for="task-description">Qué incluye (opcional)</label>
+      <input id="task-description" name="description" maxlength="140" placeholder="Ej. Barrer y trapear la cocina">
+      <label for="task-icon">Icono</label>
+      <select id="task-icon" name="icon">
+        <option value="broom">Escoba</option>
+        <option value="stairs">Escaleras</option>
+        <option value="bath">Baño</option>
+        <option value="kitchen">Cocina</option>
+        <option value="trash">Basura</option>
+        <option value="laundry">Ropa</option>
+        <option value="dishes">Trastes</option>
+        <option value="plants">Plantas</option>
+        <option value="generic">General</option>
+      </select>
+      <fieldset><legend>¿Quién participa?</legend><div id="task-people" class="people-checks"></div></fieldset>
+      <p class="form-message" id="task-message" role="status"></p>
+      <div class="form-actions"><button type="submit" class="share-button">Añadir y recalcular</button><button type="button" class="text-button" id="reset-tasks">Restaurar tareas originales</button></div>
+      <p class="dialog-note">Las tareas que agregues se guardan solo en este dispositivo. Las tareas originales siguen iguales para los demás.</p>
+    </form>
+  </dialog>
+</body>
+</html>

@@ -31,3 +31,35 @@ Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas d
 - Construir la consola y el lenguaje con lexer, parser, AST, tabla de símbolos y validación semántica.
 - Implementar la representación intermedia, dos optimizaciones y el ejecutor. Integrar las acciones con el tablero, la persistencia, las notificaciones y el historial.
 - Preparar las pruebas del lenguaje, el correo mediante SMTP de pruebas, Docker Compose, la documentación técnica y el tablero Kanban.
+
+## Ejecutar con Docker Compose
+
+1. Copia el archivo de variables de ejemplo (puedes dejar los valores estándar o ajustarlos si algún puerto está ocupado en tu máquina):
+
+```sh
+cp .env.example .env
+```
+
+2. Levanta los servicios (aplicación, PostgreSQL y Mailpit):
+
+```sh
+docker compose up --build
+```
+
+### Puertos y servicios
+
+| Servicio | Puerto estándar | Descripción |
+| --- | --- | --- |
+| `app` | `8080` (`APP_PORT`) | Aplicación web en `http://localhost:8080` |
+| `postgres` | `5432` (`POSTGRES_PORT`) | Base de datos PostgreSQL con volumen persistente `postgres_data` |
+| `mailpit` | `1025` (`SMTP_PORT`) / `8025` (`MAILPIT_UI_PORT`) | Servidor SMTP de pruebas e interfaz web en `http://localhost:8025` |
+
+### Variables de entorno y datos de ejemplo
+
+Las variables disponibles se encuentran en `.env.example` (`APP_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`, `DATABASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `MAILPIT_UI_PORT`, `SMTP_FROM`).
+
+Los scripts `.sql` o `.sh` colocados en `db/init/` se ejecutan automáticamente al inicializar el volumen de PostgreSQL por primera vez (en espera del esquema y datos semilla del issue `#5`). Para reiniciar desde cero incluyendo la base de datos:
+
+```sh
+docker compose down -v
+```

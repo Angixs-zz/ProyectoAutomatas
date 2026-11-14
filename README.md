@@ -27,6 +27,8 @@ Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas d
 
 ## Pendientes del equipo
 
+El [borrador de arquitectura y contratos iniciales (LT-1)](arquitectura-semana-1.md) contiene el diagrama de ejecución, catálogo y formato de errores propuestos para revisar con Yareli y el equipo. Aún no están aprobados ni implementados.
+
 - Definir el catálogo y la gramática de comandos para crear tareas, asignarlas, cambiar su estado y notificar, incluidas las instrucciones condicionales.
 - Construir la consola y el lenguaje con lexer, parser, AST, tabla de símbolos y validación semántica.
 - Implementar la representación intermedia, dos optimizaciones y el ejecutor. Integrar las acciones con el tablero, la persistencia, las notificaciones y el historial.

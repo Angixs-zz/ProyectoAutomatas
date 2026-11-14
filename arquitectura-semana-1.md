@@ -135,15 +135,17 @@ Contrato de errores para revisar con Yareli: `ok=false` implica `resultados=[]` 
 
 ## Arranque y revisión
 
-La base requiere Node.js 22 o superior y Python 3. El repositorio se puede clonar con `git clone https://github.com/Angixs-zz/ProyectoAutomatas.git`. Desde la carpeta `ProyectoAutomatas`, usar estos comandos para iniciar la rama de arquitectura.
+La base requiere Node.js 22 o superior y Python 3. El repositorio se puede clonar con `git clone https://github.com/Angixs-zz/ProyectoAutomatas.git`. Desde la carpeta `ProyectoAutomatas`, usar estos comandos para traer la rama de arquitectura ya publicada.
 
 ```sh
 git switch main
 git pull --ff-only origin main
-git switch -c feature/lt-1
+git switch feature/lt-1
 npm test
 npm start
 ```
+
+Si la rama no existe en tu copia local, usa `git switch -c feature/lt-1 origin/feature/lt-1` en lugar de `git switch feature/lt-1`.
 
 Abrir `http://localhost:8080`. El calendario y sus pruebas funcionan sin instalar paquetes adicionales. El arranque y las 15 pruebas base se verificaron sobre `e99b88f`.
 

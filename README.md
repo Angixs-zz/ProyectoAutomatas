@@ -1,4 +1,4 @@
-# AutoTask · ProyectoAutomtas
+# AutoTask · ProyectoAutomatas
 
 Base inicial del proyecto integrador de Lenguajes y Autómatas II. AutoTask corresponde a la opción 3 de la consigna, enfocada en la automatización de tareas y procesos mediante instrucciones escritas.
 
@@ -18,8 +18,8 @@ El punto de partida es [TareasHogar en el commit `dfbc59b`](https://github.com/A
 Con Node.js 22 o superior y Python 3, clona el repositorio y levanta el servidor estático.
 
 ```sh
-git clone https://github.com/Angixs-zz/ProyectoAutomtas.git
-cd ProyectoAutomtas
+git clone https://github.com/Angixs-zz/ProyectoAutomatas.git
+cd ProyectoAutomatas
 npm start
 ```
 

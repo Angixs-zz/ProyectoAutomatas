@@ -23,3 +23,27 @@
 
 @media(max-width:900px){.console-panel{grid-template-columns:1fr}}
 @media(max-width:640px){.console-section{padding-top:31px}.console-panel{padding:16px}.section-heading .small-note{display:none}}
+
+.console-examples{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:10px;color:var(--muted)}
+.console-example-list{display:flex;flex-wrap:wrap;gap:6px}
+.console-example{border:1px solid var(--line);border-radius:999px;background:var(--paper);font-size:10px;padding:4px 10px}
+.console-fail{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);cursor:pointer}
+.console-fail input{accent-color:var(--green)}
+
+.console-status[data-estado="cargando"]::before{content:"";display:inline-block;width:10px;height:10px;margin-right:8px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;vertical-align:-1px;animation:console-giro .8s linear infinite}
+@keyframes console-giro{to{transform:rotate(360deg)}}
+
+.console-result,.console-diagnostic{display:grid;gap:4px;background:var(--paper);border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:10px 12px}
+.console-result{border-left-color:var(--green)}
+.console-diagnostic{background:var(--error-bg);border-color:var(--error-line)}
+.console-diagnostic[data-etapa="lexica"]{border-left-color:#c9853a}
+.console-diagnostic[data-etapa="sintactica"]{border-left-color:#b5577e}
+.console-diagnostic[data-etapa="semantica"]{border-left-color:#7f6bc0}
+.console-diagnostic[data-etapa="ejecucion"]{border-left-color:var(--error)}
+.console-item-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.console-badge{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--green)}
+.console-diagnostic .console-badge{color:var(--error)}
+.console-code{font:600 11px ui-monospace,'Cascadia Code',Consolas,monospace}
+.console-location{font-size:10px;color:var(--muted)}
+.console-goto{border:0;background:none;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.console-message{margin:0;font-size:12px;overflow-wrap:anywhere}

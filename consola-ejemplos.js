@@ -1,4 +1,9 @@
 // Respuestas de EJEMPLO para la consola (#7) mientras no existe la API (#6).
+
+// Imitan el formato de arquitectura-semana-1.md (PR #21) y los errores de la gramática (PR #22).
+// No es el lexer ni el parser oficiales (#3 y #4): es un simulador sencillo para probar la interfaz.
+// En #16 el cuerpo de enviarPrograma() se cambia por un fetch() a la API real.
+
 export const ESTADOS = ['PENDIENTE', 'EN_PROGRESO', 'COMPLETADA', 'CANCELADA'];
 
 export const USUARIOS_EJEMPLO = ['Yareli', 'Diego', 'Angel', 'Edwin', 'Melody', 'Miguel Angel'];

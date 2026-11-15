@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="./styles.css?v=20261101-1">
   <link rel="stylesheet" href="./consola.css">
   <script type="module" src="./app.js?v=20261101-1"></script>
+  <script type="module" src="./consola.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -39,6 +40,8 @@
             <button type="button" class="console-secondary" id="console-validate">Validar</button>
             <span class="console-hint">Ctrl + Enter ejecuta · Ctrl + Shift + Enter valida</span>
           </div>
+                <div class="console-examples"><span>Ejemplos:</span><div class="console-example-list" id="console-examples"></div></div>
+          <label class="console-fail"><input type="checkbox" id="console-fail"> Simular que la API no responde</label>
         </form>
         <div class="console-output">
           <p class="console-output-label"><span class="live-dot" aria-hidden="true"></span> RESULTADO</p>

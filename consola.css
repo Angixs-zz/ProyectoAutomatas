@@ -1,0 +1,25 @@
+/* Consola AutoTask (#7). */
+:root{--error:#a34d3e;--error-bg:#fbefec;--error-line:#efd3cc}
+[data-theme="dark"]{--error:#f0a596;--error-bg:#3a2723;--error-line:#5c3a33}
+
+.console-section{padding:43px 0 8px}
+.console-panel{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;padding:24px;background:var(--paper);border:1px solid var(--line);border-radius:16px}
+
+.console-editor{display:flex;flex-direction:column;gap:10px;min-width:0}
+.console-editor>label{font-size:11px;font-weight:600}
+#console-input{width:100%;min-height:190px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink);padding:14px 16px;font:13px/1.7 ui-monospace,'Cascadia Code',Consolas,monospace}
+.console-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.console-secondary{border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12px;font-weight:600;padding:10px 16px}
+.console-hint{font-size:10px;color:var(--muted)}
+
+.console-output{min-width:0;background:var(--pale);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.console-output-label{display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:1px;color:var(--green);font-weight:600;margin:0}
+.console-status{font-size:12px;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.console-status[data-estado="cargando"]{color:var(--ink)}
+.console-status[data-estado="exito"]{color:var(--green);border-color:var(--green)}
+.console-status[data-estado="error"]{color:var(--error);background:var(--error-bg);border-color:var(--error-line)}
+.console-results,.console-diagnostics{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.console-results:empty,.console-diagnostics:empty{display:none}
+
+@media(max-width:900px){.console-panel{grid-template-columns:1fr}}
+@media(max-width:640px){.console-section{padding-top:31px}.console-panel{padding:16px}.section-heading .small-note{display:none}}

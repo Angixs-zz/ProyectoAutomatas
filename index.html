@@ -15,6 +15,7 @@
       ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   </script>
   <link rel="stylesheet" href="./styles.css?v=20261101-1">
+  <link rel="stylesheet" href="./consola.css">
   <script type="module" src="./app.js?v=20261101-1"></script>
 </head>
 <body>
@@ -26,6 +27,27 @@
   </header>
 
   <main>
+        <!-- Consola AutoTask (#7): aquí se escriben las instrucciones del lenguaje -->
+    <section class="console-section" id="consola" aria-labelledby="console-heading">
+      <div class="section-heading"><div><p class="eyebrow">LENGUAJE AUTOTASK</p><h2 id="console-heading">Consola de instrucciones</h2></div><span class="small-note">Una instrucción por línea</span></div>
+      <div class="console-panel">
+        <form class="console-editor" id="console-form">
+          <label for="console-input">Escribe una o varias instrucciones</label>
+          <textarea id="console-input" spellcheck="false" autocomplete="off" placeholder='CREAR TAREA "Preparar informe"'></textarea>
+          <div class="console-actions">
+            <button type="button" class="share-button" id="console-run">Ejecutar</button>
+            <button type="button" class="console-secondary" id="console-validate">Validar</button>
+            <span class="console-hint">Ctrl + Enter ejecuta · Ctrl + Shift + Enter valida</span>
+          </div>
+        </form>
+        <div class="console-output">
+          <p class="console-output-label"><span class="live-dot" aria-hidden="true"></span> RESULTADO</p>
+          <div class="console-status" id="console-status" role="status" aria-live="polite" data-estado="vacio">Escribe una instrucción y presiona Validar o Ejecutar.</div>
+          <ol class="console-results" id="console-results"></ol>
+          <ol class="console-diagnostics" id="console-diagnostics"></ol>
+        </div>
+      </div>
+    </section>
     <div class="workspace">
     <div class="workspace-content">
     <section class="intro">

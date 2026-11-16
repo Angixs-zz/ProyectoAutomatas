@@ -54,6 +54,8 @@ export function validarAST(ast, tabla) {
   // Estado previsto de cada tarea mientras avanza el programa.
   // Si no está en el mapa se usa el del repositorio; null significa "no se sabe".
   const estadosPrevistos = new Map();
+  // Las tareas creadas bajo SI quizá no existan después del condicional.
+  const tareasCondicionales = new Set();
 
   function reportar(nodo, codigo, mensaje, ubicacion) {
     diagnosticos.push({
@@ -71,7 +73,13 @@ export function validarAST(ast, tabla) {
 
   function tarea(nodo, cadena) {
     const resultado = tabla.resolverTarea(cadena.valor, cadena.inicio);
-    if (resultado.ok) return resultado.simbolo;
+    if (resultado.ok) {
+      if (tareasCondicionales.has(resultado.simbolo)) {
+        reportar(nodo, 'REFERENCIA_CONDICIONAL', `la tarea «${cadena.valor}» podría no haberse creado porque depende de un SI. Crea la tarea fuera del condicional antes de usarla.`, cadena.inicio);
+        return null;
+      }
+      return resultado.simbolo;
+    }
     reportarResolucion(nodo, resultado);
     return null;
   }
@@ -111,7 +119,10 @@ export function validarAST(ast, tabla) {
         }
         referencias.tarea = tabla.declararTarea(nodo.titulo.valor, nodo.titulo.inicio);
         // Si la creación depende de un SI, no se sabe si la tarea existirá.
-        if (contexto.dentroDeSi) estadosPrevistos.set(referencias.tarea, null);
+        if (contexto.dentroDeSi) {
+          estadosPrevistos.set(referencias.tarea, null);
+          tareasCondicionales.add(referencias.tarea);
+        }
         break;
       }
 

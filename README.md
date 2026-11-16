@@ -1,4 +1,4 @@
-# AutoTask · ProyectoAutomtas
+# AutoTask · ProyectoAutomatas
 
 Base inicial del proyecto integrador de Lenguajes y Autómatas II. AutoTask corresponde a la opción 3 de la consigna, enfocada en la automatización de tareas y procesos mediante instrucciones escritas.
 
@@ -18,14 +18,16 @@ El punto de partida es [TareasHogar en el commit `dfbc59b`](https://github.com/A
 Con Node.js 22 o superior y Python 3, clona el repositorio y levanta el servidor estático.
 
 ```sh
-git clone https://github.com/Angixs-zz/ProyectoAutomtas.git
-cd ProyectoAutomtas
+git clone https://github.com/Angixs-zz/ProyectoAutomatas.git
+cd ProyectoAutomatas
 npm start
 ```
 
 Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas del calendario, usa `npm test`. El proyecto base funciona sin instalar paquetes adicionales.
 
 ## Pendientes del equipo
+
+El [borrador de arquitectura y contratos iniciales (LT-1)](arquitectura-semana-1.md) contiene el diagrama de ejecución, catálogo y formato de errores propuestos para revisar con Yareli y el equipo. Aún no están aprobados ni implementados.
 
 - Definir el catálogo y la gramática de comandos para crear tareas, asignarlas, cambiar su estado y notificar, incluidas las instrucciones condicionales.
 - Construir la consola y el lenguaje con lexer, parser, AST, tabla de símbolos y validación semántica.

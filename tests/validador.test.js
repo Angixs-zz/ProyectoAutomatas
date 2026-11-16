@@ -252,3 +252,12 @@ test('validar no modifica el repositorio ni el AST, y cada validación empieza d
   assert.deepEqual(ast, copia);
   assert.equal((await repo.listarTareas()).length, TAREAS_PRUEBA.length);
 });
+
+test('una tarea creada bajo SI no se considera existente en las líneas siguientes', async () => {
+  const r = await validar(programa(
+    si(1, 'Preparar informe', 'COMPLETADA', (c) => crear(1, 'Tarea condicional', null, c)),
+    consultar(2, 'Tarea condicional'),
+  ));
+  assert.equal(r.ok, false);
+  assert.deepEqual(codigos(r).map(([codigo, linea]) => [codigo, linea]), [['REFERENCIA_CONDICIONAL', 2]]);
+});

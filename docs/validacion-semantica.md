@@ -52,6 +52,7 @@ CONSULTAR TAREA: No existe la tarea «Informe». Revisa el título o créala ant
 | `CORREO_INVALIDO` | El destinatario de `ENVIAR CORREO` no tiene forma de correo. Ya lo usaba la consola de ejemplo. |
 | `FECHA_INVALIDA` | La fecha tiene el formato correcto pero ese día no existe. Nuevo. |
 | `TEXTO_VACIO` | Título o mensaje vacíos o solo con espacios. Nuevo. |
+| `REFERENCIA_CONDICIONAL` | Se usa una tarea creada dentro de un `SI` posterior al condicional, sin garantía de que exista. |
 
 ## Transiciones de estado (propuesta)
 
@@ -71,6 +72,6 @@ La validación lleva un estado previsto de cada tarea mientras recorre las líne
 1. Una tarea creada con `CREAR TAREA` empieza en `PENDIENTE`.
 2. Un `CAMBIAR ESTADO` fuera de un `SI` actualiza el estado previsto, así que `CAMBIAR ... A COMPLETADA` seguido de `CAMBIAR ... A EN_PROGRESO` sobre la misma tarea da error en la segunda línea.
 3. Dentro de un `SI` sobre la misma tarea, la acción se revisa con el estado de la condición, porque solo se ejecuta si la tarea está en ese estado.
-4. Después de un cambio dentro de un `SI`, el estado de esa tarea queda como desconocido y ya no se revisan sus transiciones en la validación. Lo mismo pasa con una tarea creada dentro de un `SI`.
+4. Después de un cambio dentro de un `SI`, el estado de esa tarea queda como desconocido y ya no se revisan sus transiciones en la validación. Si un `SI` crea una tarea, las instrucciones posteriores no pueden asumir que existe: se devuelve `REFERENCIA_CONDICIONAL` cuando intentan utilizarla.
 
-En el caso 4, la validación no puede saber si la condición se va a cumplir. El ejecutor (#12) tiene que volver a revisar la transición al momento de ejecutar y reportar un error de etapa `ejecucion` si no está permitida. Esto queda por acordar con Edwin.
+En el caso 4, la validación no puede saber si la condición se va a cumplir. El ejecutor (#12) tiene que volver a revisar la transición al momento de ejecutar y reportar un error de etapa `ejecucion` si no está permitida. Esto queda por acordar con Edwin. El diagnóstico `REFERENCIA_CONDICIONAL` evita dar por existente una tarea cuya creación pudo no ejecutarse.

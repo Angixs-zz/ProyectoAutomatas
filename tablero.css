@@ -46,7 +46,8 @@
 .history-result{font-size:10px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 .history-result[data-resultado="exito"],.history-result[data-resultado="enviado"]{color:var(--green);border-color:var(--green)}
 .history-result[data-resultado="error"],.history-result[data-resultado="fallido"]{color:var(--error);background:var(--error-bg);border-color:var(--error-line)}
-.history-result[data-resultado="en_cola"]{color:var(--aviso);background:var(--aviso-bg);border-color:var(--aviso-line)}
+.history-result[data-resultado="no_procesado"]{color:var(--muted);border-style:dashed}
+.history-result[data-resultado="en_cola"],.history-result[data-resultado="incierto"]{color:var(--aviso);background:var(--aviso-bg);border-color:var(--aviso-line)}
 .history-instruction{font:11px ui-monospace,'Cascadia Code',Consolas,monospace;color:var(--ink);overflow-wrap:anywhere}
 .history-detail{margin:0;font-size:11px;color:var(--muted)}
 .history-list:empty,.board-columns:empty{display:none}

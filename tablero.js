@@ -18,7 +18,10 @@ const NOMBRE_OPERACION = {
   crear: 'Crear tarea', asignar: 'Asignar tarea', cambiar_estado: 'Cambiar estado', consultar: 'Consultar tarea',
   listar: 'Listar tareas', notificar: 'Notificar', enviar_correo: 'Enviar correo', condicional: 'Condicional',
 };
-const NOMBRE_RESULTADO = { exito: 'Éxito', error: 'Error', en_cola: 'En cola', enviado: 'Enviado', fallido: 'Fallido' };
+// incierto y no_procesado vienen de la ejecución parcial del ejecutor (docs/contrato-ir.md, PR #30).
+const NOMBRE_RESULTADO = {
+  exito: 'Éxito', error: 'Error', en_cola: 'En cola', enviado: 'Enviado', fallido: 'Fallido', incierto: 'Incierto', no_procesado: 'No procesado',
+};
 
 let historial = [];
 let filtro = 'todo';

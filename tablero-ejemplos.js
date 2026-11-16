@@ -8,8 +8,10 @@ import { crearRepositorioEnMemoria } from './src/semantica/repositorio-memoria.j
 export const ESTADOS_TABLERO = ['PENDIENTE', 'EN_PROGRESO', 'COMPLETADA', 'CANCELADA'];
 
 // Del más reciente al más antiguo. tipo: operacion | notificacion | correo.
+// resultado: exito | error (operaciones); en_cola | enviado | fallido | incierto | no_procesado (notificaciones y correos).
 export const HISTORIAL_EJEMPLO = [
-  { id: 'hist_7', fecha: '2026-11-15T19:10:00-06:00', tipo: 'correo', operacion: 'enviar_correo', instruccion: 'ENVIAR CORREO A "angel@ejemplo.com" MENSAJE "Revisa la IR"', resultado: 'fallido', detalle: 'No se pudo conectar con el servidor de correo de prueba.' },
+  { id: 'hist_8', fecha: '2026-11-15T19:10:00-06:00', tipo: 'notificacion', operacion: 'notificar', instruccion: 'NOTIFICAR A "Yareli" MENSAJE "Gramática lista"', usuarioId: 'user_1', resultado: 'no_procesado', detalle: 'No se procesó porque falló el despacho anterior.' },
+  { id: 'hist_7', fecha: '2026-11-15T19:09:00-06:00', tipo: 'correo', operacion: 'enviar_correo', instruccion: 'ENVIAR CORREO A "angel@ejemplo.com" MENSAJE "Revisa la IR"', resultado: 'incierto', detalle: 'El servidor de correo falló al recibir la solicitud; no se sabe si se envió.' },
   { id: 'hist_6', fecha: '2026-11-15T19:05:00-06:00', tipo: 'notificacion', operacion: 'notificar', instruccion: 'NOTIFICAR A "Edwin" MENSAJE "Docker listo"', usuarioId: 'user_4', resultado: 'en_cola', detalle: 'Notificación para Edwin' },
   { id: 'hist_5', fecha: '2026-11-15T19:04:00-06:00', tipo: 'correo', operacion: 'enviar_correo', instruccion: 'ENVIAR CORREO A "diego@ejemplo.com" MENSAJE "Pruebas listas"', resultado: 'enviado', detalle: 'Correo de prueba para diego@ejemplo.com' },
   { id: 'hist_4', fecha: '2026-11-15T19:02:00-06:00', tipo: 'operacion', operacion: 'consultar', instruccion: 'CONSULTAR TAREA "Informe"', resultado: 'error', detalle: 'No existe la tarea «Informe».' },

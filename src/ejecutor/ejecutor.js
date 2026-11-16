@@ -34,6 +34,23 @@ function fallo(codigo, mensaje, linea = null, columna = null) {
   };
 }
 
+// Los efectos externos ocurren después del commit: no se pueden revertir
+// tareas ni deshacer despachos ya aceptados cuando uno de ellos falla.
+function falloTrasCommit(codigo, mensaje, fallido, resultados, notificaciones, correos) {
+  for (const pendiente of [...notificaciones, ...correos]) {
+    if (!pendiente.aceptado) {
+      pendiente.resultado.estado = pendiente === fallido ? 'incierto' : 'no_procesado';
+    }
+  }
+  return {
+    ok: false,
+    partial: true,
+    modo: 'ejecucion',
+    resultados,
+    diagnosticos: [diagnostico(codigo, mensaje, fallido.linea, fallido.columna)],
+  };
+}
+
 function validarEntradas(programaIR, servicios) {
   if (!programaIR || programaIR.tipo !== 'ProgramaIR' || !Array.isArray(programaIR.instrucciones)) {
     throw new TypeError('Se esperaba un ProgramaIR con una lista de instrucciones.');
@@ -230,38 +247,42 @@ export async function ejecutarIR(programaIR, servicios) {
           }
 
           case 'NOTIFICAR': {
-            colaNotificaciones.push({
-              usuarioId: inst.usuario.id,
-              mensaje: inst.mensaje,
-              linea,
-              columna,
-            });
-            salida.push(envolverResultado(inst, {
+            const resultado = {
               linea,
               operacion: 'notificar',
               usuarioId: inst.usuario.id,
               destinatario: inst.usuario.nombre,
               mensaje: inst.mensaje,
               estado: 'en_cola',
-            }, temporalesCondiciones));
+            };
+            colaNotificaciones.push({
+              usuarioId: inst.usuario.id,
+              mensaje: inst.mensaje,
+              linea,
+              columna,
+              resultado,
+            });
+            salida.push(envolverResultado(inst, resultado, temporalesCondiciones));
             pc += 1;
             break;
           }
 
           case 'ENVIAR_CORREO': {
-            colaCorreos.push({
-              destinatario: inst.destinatario,
-              mensaje: inst.mensaje,
-              linea,
-              columna,
-            });
-            salida.push(envolverResultado(inst, {
+            const resultado = {
               linea,
               operacion: 'enviar_correo',
               destinatario: inst.destinatario,
               mensaje: inst.mensaje,
               estado: 'en_cola',
-            }, temporalesCondiciones));
+            };
+            colaCorreos.push({
+              destinatario: inst.destinatario,
+              mensaje: inst.mensaje,
+              linea,
+              columna,
+              resultado,
+            });
+            salida.push(envolverResultado(inst, resultado, temporalesCondiciones));
             pc += 1;
             break;
           }
@@ -312,7 +333,7 @@ export async function ejecutarIR(programaIR, servicios) {
     });
   } catch (error) {
     if (error instanceof ErrorEjecucion) {
-      return fallo(error.codigo, error.mensaje, error.linea, error.columna);
+      return fallo(error.codigo, error.message, error.linea, error.columna);
     }
     return fallo('ERROR_PERSISTENCIA', 'No se pudo completar la operación en el repositorio de tareas.');
   }
@@ -323,8 +344,13 @@ export async function ejecutarIR(programaIR, servicios) {
         usuarioId: notif.usuarioId,
         mensaje: notif.mensaje,
       });
+      notif.aceptado = true;
     } catch {
-      return fallo('ERROR_PERSISTENCIA', 'No se pudo registrar la notificación pendiente.', notif.linea, notif.columna);
+      return falloTrasCommit(
+        'ERROR_PERSISTENCIA',
+        'La transacción de tareas ya se confirmó, pero el registro de la notificación es incierto. No reintentes el programa completo.',
+        notif, resultados, colaNotificaciones, colaCorreos,
+      );
     }
   }
 
@@ -334,8 +360,13 @@ export async function ejecutarIR(programaIR, servicios) {
         destinatario: correo.destinatario,
         mensaje: correo.mensaje,
       });
+      correo.aceptado = true;
     } catch {
-      return fallo('ERROR_CORREO', 'No se pudo enviar el correo de prueba.', correo.linea, correo.columna);
+      return falloTrasCommit(
+        'ERROR_CORREO',
+        'La transacción de tareas ya se confirmó, pero el envío del correo es incierto. No reintentes el programa completo.',
+        correo, resultados, colaNotificaciones, colaCorreos,
+      );
     }
   }
 

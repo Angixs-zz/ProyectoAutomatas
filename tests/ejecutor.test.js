@@ -36,6 +36,7 @@ test('ejecuta crear, asignar, cambiar estado, consultar, listar, notificar y env
   const res = await ejecutarIR(ir, servicios);
 
   assert.equal(res.ok, true);
+  assert.equal(res.partial, undefined);
   assert.equal(res.modo, 'ejecucion');
   assert.deepEqual(res.diagnosticos, []);
   assert.equal(res.resultados.length, 7);
@@ -141,10 +142,12 @@ test('revierte la transacción y evita correos fantasma si falla una transición
   assert.equal(res.ok, false);
   assert.equal(res.modo, 'ejecucion');
   assert.deepEqual(res.resultados, []);
+  assert.equal(res.partial, undefined);
   assert.equal(res.diagnosticos.length, 1);
   assert.equal(res.diagnosticos[0].etapa, 'ejecucion');
   assert.equal(res.diagnosticos[0].codigo, 'TRANSICION_INVALIDA');
   assert.equal(res.diagnosticos[0].linea, 5);
+  assert.match(res.diagnosticos[0].mensaje, /no puede pasar de COMPLETADA a EN_PROGRESO/);
 
   const estado = servicios.obtenerEstado();
   assert.equal(estado.tareas.length, 3);
@@ -194,7 +197,10 @@ test('reporta TAREA_INEXISTENTE, ERROR_PERSISTENCIA y ERROR_CORREO con servicios
     serviciosErrorBD,
   );
   assert.equal(resBD.ok, false);
+  assert.equal(resBD.partial, undefined);
+  assert.deepEqual(resBD.resultados, []);
   assert.equal(resBD.diagnosticos[0].codigo, 'ERROR_PERSISTENCIA');
+  assert.equal(resBD.diagnosticos[0].mensaje, 'No se pudo completar la operación en el repositorio de tareas.');
   assert.equal(resBD.diagnosticos[0].mensaje.includes('secret_db_password'), false);
   assert.equal(serviciosErrorBD.obtenerEstado().tareas.length, 3);
 
@@ -207,6 +213,58 @@ test('reporta TAREA_INEXISTENTE, ERROR_PERSISTENCIA y ERROR_CORREO con servicios
     serviciosErrorCorreo,
   );
   assert.equal(resCorreo.ok, false);
+  assert.equal(resCorreo.partial, true);
   assert.equal(resCorreo.diagnosticos[0].codigo, 'ERROR_CORREO');
   assert.equal(resCorreo.diagnosticos[0].etapa, 'ejecucion');
+  assert.equal(resCorreo.resultados[0].estado, 'incierto');
+});
+
+test('fallo SMTP después del commit conserva tareas y distingue correos aceptados, inciertos y no procesados', async () => {
+  const servicios = crearServiciosEnMemoria();
+  const enviar = servicios.correo.enviarCorreo;
+  let intentos = 0;
+  servicios.correo.enviarCorreo = async (correo) => {
+    if (++intentos === 2) throw new Error('secret: SMTP pudo haber enviado');
+    return enviar(correo);
+  };
+  const res = await ejecutarIR(programa(
+    { op: 'CREAR_TAREA', titulo: 'Guardada', salidaRef: 'tmp_1', linea: 1, columna: 1 },
+    { op: 'ENVIAR_CORREO', destinatario: 'a@ejemplo.com', mensaje: 'Primero', linea: 2, columna: 1 },
+    { op: 'ENVIAR_CORREO', destinatario: 'b@ejemplo.com', mensaje: 'Segundo', linea: 3, columna: 1 },
+    { op: 'ENVIAR_CORREO', destinatario: 'c@ejemplo.com', mensaje: 'Tercero', linea: 4, columna: 1 },
+  ), servicios);
+
+  assert.equal(res.ok, false);
+  assert.equal(res.partial, true);
+  assert.deepEqual(res.resultados.map((r) => r.estado), ['PENDIENTE', 'en_cola', 'incierto', 'no_procesado']);
+  assert.equal(res.diagnosticos[0].codigo, 'ERROR_CORREO');
+  assert.equal(res.diagnosticos[0].linea, 3);
+  assert.match(res.diagnosticos[0].mensaje, /transacción de tareas ya se confirmó/);
+  assert.doesNotMatch(res.diagnosticos[0].mensaje, /secret/);
+  assert.equal(servicios.obtenerEstado().tareas.at(-1).titulo, 'Guardada');
+  assert.deepEqual(servicios.obtenerEstado().correos.map((c) => c.destinatario), ['a@ejemplo.com']);
+  assert.equal(intentos, 2, 'el ejecutor no reintenta ni procesa correos posteriores');
+});
+
+test('fallo de notificación después del commit conserva resultado condicional y no intenta el correo', async () => {
+  const servicios = crearServiciosEnMemoria();
+  servicios.notificaciones.registrarNotificacion = async () => {
+    throw new Error('Persistencia no disponible');
+  };
+  const res = await ejecutarIR(programa(
+    { op: 'CREAR_TAREA', titulo: 'Guardada', salidaRef: 'tmp_1', linea: 1, columna: 1 },
+    { op: 'EVALUAR_ESTADO', tarea: refTmp('tmp_1', 'Guardada'), estadoEsperado: 'PENDIENTE', destinoTemp: 'cond_1', linea: 2, columna: 1 },
+    { op: 'SALTAR_SI_FALSO', condicion: 'cond_1', etiqueta: 'fin_si_1', linea: 2, columna: 1 },
+    { op: 'NOTIFICAR', usuario: usuarioYareli, mensaje: 'Aviso', linea: 2, columna: 50, condicional: { temp: 'cond_1', linea: 2 } },
+    { op: 'ETIQUETA', nombre: 'fin_si_1' },
+    { op: 'ENVIAR_CORREO', destinatario: 'a@ejemplo.com', mensaje: 'Mensaje', linea: 3, columna: 1 },
+  ), servicios);
+
+  assert.equal(res.ok, false);
+  assert.equal(res.partial, true);
+  assert.equal(res.diagnosticos[0].codigo, 'ERROR_PERSISTENCIA');
+  assert.equal(res.resultados[1].accion.estado, 'incierto');
+  assert.equal(res.resultados[2].estado, 'no_procesado');
+  assert.equal(servicios.obtenerEstado().tareas.at(-1).titulo, 'Guardada');
+  assert.equal(servicios.obtenerEstado().correos.length, 0);
 });

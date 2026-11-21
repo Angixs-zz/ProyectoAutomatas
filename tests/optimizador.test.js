@@ -87,3 +87,59 @@ test('no elimina cambios de estado si hay una consulta observable intermedia', a
 
   assert.equal(opt.instrucciones.filter((i) => i.op === 'CAMBIAR_ESTADO').length, 2);
 });
+
+// Caso nuevo 1 (#43 EX-5): barrera por efectos externos (NOTIFICAR y ENVIAR CORREO).
+// Motivo de seguridad: NOTIFICAR y ENVIAR_CORREO producen efectos observables externos
+// e historial intermedio; si se eliminara el primer CAMBIAR_ESTADO, el registro de la
+// corrida perdería el orden real de transición previo al envío de avisos.
+test('no elimina cambios de estado cuando hay notificaciones o correos intermedios', async () => {
+  const ir = await compilar([
+    'CREAR TAREA "Aviso intermedio"',
+    'CAMBIAR ESTADO TAREA "Aviso intermedio" A EN_PROGRESO',
+    'NOTIFICAR A "Yareli" MENSAJE "Pasó a progreso"',
+    'ENVIAR CORREO A "diego@ejemplo.com" MENSAJE "En progreso"',
+    'CAMBIAR ESTADO TAREA "Aviso intermedio" A COMPLETADA',
+  ].join('\n'));
+
+  const opt = optimizarIR(ir);
+
+  assert.equal(opt.metadatos.optimizacionesAplicadas.includes('eliminacion_cambios_estado_redundantes'), false);
+  assert.equal(opt.instrucciones.filter((i) => i.op === 'CAMBIAR_ESTADO').length, 2);
+  assert.equal(opt.instrucciones.length, ir.instrucciones.length);
+
+  const servOrig = crearServiciosEnMemoria();
+  const servOpt = crearServiciosEnMemoria();
+  const resOrig = await ejecutarIR(ir, servOrig);
+  const resOpt = await ejecutarIR(opt, servOpt);
+
+  assert.deepEqual(resOpt, resOrig);
+  assert.deepEqual(servOpt.obtenerEstado(), servOrig.obtenerEstado());
+});
+
+// Caso nuevo 2 (#43 EX-5): estado desconocido tras un SI sobre una tarea del repositorio.
+// Motivo de seguridad: el estado inicial de una tarea existente solo se conoce en runtime;
+// además, si un primer SI puede modificarla, el segundo SI y un cambio posterior no deben
+// plegarse ni simplificarse estáticamente para no alterar ramas ni ocultar errores reales.
+test('conserva condicionales y cambios de estado cuando un SI previo depende de runtime', async () => {
+  const ir = await compilar([
+    'SI TAREA "Preparar informe" ESTA PENDIENTE ENTONCES CAMBIAR ESTADO TAREA "Preparar informe" A EN_PROGRESO',
+    'SI TAREA "Preparar informe" ESTA EN_PROGRESO ENTONCES ENVIAR CORREO A "diego@ejemplo.com" MENSAJE "Informe activo"',
+  ].join('\n'));
+
+  const opt = optimizarIR(ir);
+
+  assert.deepEqual(opt.metadatos.optimizacionesAplicadas, []);
+  assert.equal(opt.instrucciones.filter((i) => i.op === 'EVALUAR_ESTADO').length, 2);
+  assert.equal(opt.instrucciones.filter((i) => i.op === 'SALTAR_SI_FALSO').length, 2);
+
+  const servOrig = crearServiciosEnMemoria();
+  const servOpt = crearServiciosEnMemoria();
+  const resOrig = await ejecutarIR(ir, servOrig);
+  const resOpt = await ejecutarIR(opt, servOpt);
+
+  assert.equal(resOpt.ok, true);
+  assert.deepEqual(resOpt, resOrig);
+  assert.deepEqual(servOpt.obtenerEstado(), servOrig.obtenerEstado());
+  assert.equal(servOpt.obtenerEstado().tareas[0].estado, 'EN_PROGRESO');
+  assert.equal(servOpt.obtenerEstado().correos.length, 1);
+});

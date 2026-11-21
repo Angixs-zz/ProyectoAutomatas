@@ -12,8 +12,19 @@ erDiagram
 
 - `usuarios`: identificador compatible con `user_N`, nombre y correo opcional.
 - `tareas`: identificador compatible con `task_N`, título, fecha opcional, estado actual y `responsable_id` opcional.
-- `historial_tareas`: eventos append-only de creación, asignación/reasignación y cambio de estado, con valores anterior/nuevo en JSONB.
-- `notificaciones`: mensajes internos persistidos con estado `en_cola`, `enviado` o `error`. El envío SMTP corresponde a otro issue.
+- `historial_tareas`: registro único (sin duplicar tablas) de creación, asignación, cambio de estado, consultas, listados, notificaciones, correos, condicionales y errores, con `categoria`, `operacion`, `instruccion`, `resultado`, `detalle` y valores anterior/nuevo en JSONB.
+- `notificaciones`: mensajes internos persistidos.
+
+### Estados persistentes vs resultados de despacho
+
+- **Estados persistentes en PostgreSQL (`notificaciones.estado`):**
+  - `en_cola`: notificación persistida/aceptada en cola para entrega.
+  - `enviado`: entrega confirmada por el servicio correspondiente.
+  - `fallido`: fallo definitivo de despacho confirmado.
+  - `incierto`: fallo posterior al `COMMIT`; no se puede confirmar si el servicio externo procesó la solicitud.
+  - `no_procesado`: despacho omitido tras un fallo previo en la fase posterior al `COMMIT`.
+  - `error`: alias legado del esquema inicial equivalente a `fallido`.
+- **Resultados de despacho en memoria/respuesta de API (`ejecutor.js` y tablero):** utilizan los mismos valores (`en_cola`, `enviado`, `fallido`, `incierto`, `no_procesado`) para distinguir entre operaciones ya confirmadas en BD y despachos externos no revertibles (`partial: true`).
 
 El responsable actual se guarda en `tareas.responsable_id` para que el repositorio entregue directamente `responsableId`, como espera la semántica y el ejecutor. Las reasignaciones pasadas se conservan en `historial_tareas`; no hay dos fuentes de verdad para la asignación actual. Los cuatro estados y sus transiciones permanecen definidos por `src/semantica/validador.js`.
 

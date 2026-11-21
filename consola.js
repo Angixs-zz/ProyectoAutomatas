@@ -79,8 +79,12 @@ function describir(r) {
     case 'cambiar_estado': return `Tarea «${r.titulo}» cambió a ${r.estado}.`;
     case 'consultar': return `«${r.tarea.titulo}»: ${r.tarea.estado}, responsable: ${r.tarea.responsable ?? 'sin asignar'}.`;
     case 'listar': return `${plural(r.tareas.length, 'tarea', 'tareas')}: ${r.tareas.map((t) => `${t.titulo} (${t.estado})`).join(', ')}.`;
-    case 'notificar': return `Notificación para ${r.destinatario} en cola: "${r.mensaje}".`;
-    case 'enviar_correo': return `Correo de prueba para ${r.destinatario} en cola (todavía no confirma la entrega).`;
+    case 'notificar': return r.estado === 'incierto' || r.estado === 'no_procesado'
+      ? `Notificación para ${r.destinatario}: ${r.estado === 'incierto' ? 'el registro es incierto' : 'no se procesó'}.`
+      : `Notificación para ${r.destinatario} en cola: "${r.mensaje}".`;
+    case 'enviar_correo': return r.estado === 'incierto' || r.estado === 'no_procesado'
+      ? `Correo de prueba para ${r.destinatario}: ${r.estado === 'incierto' ? 'el envío es incierto' : 'no se procesó'}.`
+      : `Correo de prueba para ${r.destinatario} en cola (todavía no confirma la entrega).`;
     case 'condicional': return r.condicion ? `La condición se cumplió → ${describir(r.accion)}` : 'La condición no se cumplió: la acción no se ejecutó.';
     default: return `Operación ${r.operacion} realizada.`;
   }
@@ -135,7 +139,12 @@ async function enviar(modo) {
         : `Programa ejecutado: ${plural(respuesta.resultados.length, 'instrucción', 'instrucciones')}.`);
     } else {
       pintarDiagnosticos(respuesta.diagnosticos);
-      mostrarEstado('error', `Se ${respuesta.diagnosticos.length === 1 ? 'encontró' : 'encontraron'} ${plural(respuesta.diagnosticos.length, 'error', 'errores')}. No se ejecutó ninguna instrucción.`);
+      if (respuesta.partial === true) {
+        pintarResultados(respuesta.resultados);
+        mostrarEstado('error', 'Ejecución parcial: la transacción de tareas se confirmó, pero falló un despacho. Revisa los resultados; no reintentes el programa completo.');
+      } else {
+        mostrarEstado('error', `Se ${respuesta.diagnosticos.length === 1 ? 'encontró' : 'encontraron'} ${plural(respuesta.diagnosticos.length, 'error', 'errores')}. No se ejecutó ninguna instrucción.`);
+      }
     }
     if (modo === 'ejecucion') {
       window.dispatchEvent(new CustomEvent('autotask:programa-ejecutado'));

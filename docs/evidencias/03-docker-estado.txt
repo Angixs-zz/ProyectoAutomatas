@@ -1,0 +1,8 @@
+=== docker compose ps ===
+NAME                           IMAGE                    COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+proyectoautomatas-app-1        proyectoautomatas-app    "docker-entrypoint.s…"   app        35 minutes ago   Up 34 minutes             0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+proyectoautomatas-mailpit-1    axllent/mailpit:latest   "/mailpit"               mailpit    35 minutes ago   Up 35 minutes (healthy)   0.0.0.0:1025->1025/tcp, [::]:1025->1025/tcp, 0.0.0.0:8025->8025/tcp, [::]:8025->8025/tcp, 1110/tcp
+proyectoautomatas-postgres-1   postgres:16-alpine       "docker-entrypoint.s…"   postgres   35 minutes ago   Up 34 minutes (healthy)   0.0.0.0:55432->5432/tcp, [::]:55432->5432/tcp
+
+=== GET /api/salud ===
+{"ok":true,"almacenamiento":"postgres"}

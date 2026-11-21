@@ -1,0 +1,734 @@
+
+> proyecto-automatas@1.0.0 test
+> node --test
+
+TAP version 13
+# Subtest: los casos inválidos de la gramática dan la etapa, el código y la ubicación esperados
+ok 1 - los casos inválidos de la gramática dan la etapa, el código y la ubicación esperados
+  ---
+  duration_ms: 4.296069
+  type: 'test'
+  ...
+# Subtest: una tarea que no existe es un error semántico
+ok 2 - una tarea que no existe es un error semántico
+  ---
+  duration_ms: 4.556809
+  type: 'test'
+  ...
+# Subtest: reporta los errores de todas las líneas, no solo el primero
+ok 3 - reporta los errores de todas las líneas, no solo el primero
+  ---
+  duration_ms: 0.414733
+  type: 'test'
+  ...
+# Subtest: validar un programa correcto no devuelve resultados ni cambia nada
+ok 4 - validar un programa correcto no devuelve resultados ni cambia nada
+  ---
+  duration_ms: 0.415508
+  type: 'test'
+  ...
+# Subtest: ejecutar devuelve un resultado por instrucción con su línea
+ok 5 - ejecutar devuelve un resultado por instrucción con su línea
+  ---
+  duration_ms: 1.029457
+  type: 'test'
+  ...
+# Subtest: el condicional solo ejecuta su acción si la condición es verdadera
+ok 6 - el condicional solo ejecuta su acción si la condición es verdadera
+  ---
+  duration_ms: 0.543416
+  type: 'test'
+  ...
+# Subtest: todos los ejemplos de la consola dan la respuesta que anuncia su nombre
+ok 7 - todos los ejemplos de la consola dan la respuesta que anuncia su nombre
+  ---
+  duration_ms: 0.714248
+  type: 'test'
+  ...
+# Subtest: la API simulada puede fallar para probar el error de carga
+ok 8 - la API simulada puede fallar para probar el error de carga
+  ---
+  duration_ms: 14.571308
+  type: 'test'
+  ...
+# Subtest: envía un correo de prueba a un servidor SMTP compatible con Mailpit
+ok 9 - envía un correo de prueba a un servidor SMTP compatible con Mailpit
+  ---
+  duration_ms: 36.468065
+  type: 'test'
+  ...
+# Subtest: rechaza cuando el servidor SMTP no está disponible
+ok 10 - rechaza cuando el servidor SMTP no está disponible
+  ---
+  duration_ms: 5.8771
+  type: 'test'
+  ...
+# Subtest: ejecuta crear, asignar, cambiar estado, consultar, listar, notificar y enviar correo
+ok 11 - ejecuta crear, asignar, cambiar estado, consultar, listar, notificar y enviar correo
+  ---
+  duration_ms: 4.873339
+  type: 'test'
+  ...
+# Subtest: condicional verdadero ejecuta su acción y registra el resultado observable
+ok 12 - condicional verdadero ejecuta su acción y registra el resultado observable
+  ---
+  duration_ms: 1.033023
+  type: 'test'
+  ...
+# Subtest: condicional falso salta la acción, no produce efectos y registra condicion false
+ok 13 - condicional falso salta la acción, no produce efectos y registra condicion false
+  ---
+  duration_ms: 0.495164
+  type: 'test'
+  ...
+# Subtest: revierte la transacción y evita correos fantasma si falla una transición en tiempo de ejecución
+ok 14 - revierte la transacción y evita correos fantasma si falla una transición en tiempo de ejecución
+  ---
+  duration_ms: 1.646159
+  type: 'test'
+  ...
+# Subtest: rechaza asignar en tiempo de ejecución una tarea finalizada por un condicional previo
+ok 15 - rechaza asignar en tiempo de ejecución una tarea finalizada por un condicional previo
+  ---
+  duration_ms: 0.773232
+  type: 'test'
+  ...
+# Subtest: reporta TAREA_INEXISTENTE, ERROR_PERSISTENCIA y ERROR_CORREO con servicios simulados sin filtrar stack
+ok 16 - reporta TAREA_INEXISTENTE, ERROR_PERSISTENCIA y ERROR_CORREO con servicios simulados sin filtrar stack
+  ---
+  duration_ms: 1.089433
+  type: 'test'
+  ...
+# Subtest: fallo SMTP después del commit conserva tareas y distingue correos aceptados, inciertos y no procesados
+ok 17 - fallo SMTP después del commit conserva tareas y distingue correos aceptados, inciertos y no procesados
+  ---
+  duration_ms: 1.054662
+  type: 'test'
+  ...
+# Subtest: fallo de notificación después del commit conserva resultado condicional y no intenta el correo
+ok 18 - fallo de notificación después del commit conserva resultado condicional y no intenta el correo
+  ---
+  duration_ms: 0.6267
+  type: 'test'
+  ...
+# Subtest: CREAR TAREA genera CREAR_TAREA con fecha y un temporal
+ok 19 - CREAR TAREA genera CREAR_TAREA con fecha y un temporal
+  ---
+  duration_ms: 4.863669
+  type: 'test'
+  ...
+# Subtest: ASIGNAR TAREA sobre una tarea existente usa su id y los datos del usuario
+ok 20 - ASIGNAR TAREA sobre una tarea existente usa su id y los datos del usuario
+  ---
+  duration_ms: 1.087054
+  type: 'test'
+  ...
+# Subtest: CAMBIAR ESTADO genera CAMBIAR_ESTADO con el estado nuevo
+ok 21 - CAMBIAR ESTADO genera CAMBIAR_ESTADO con el estado nuevo
+  ---
+  duration_ms: 0.730552
+  type: 'test'
+  ...
+# Subtest: CONSULTAR TAREA y LISTAR TAREAS
+ok 22 - CONSULTAR TAREA y LISTAR TAREAS
+  ---
+  duration_ms: 0.627289
+  type: 'test'
+  ...
+# Subtest: NOTIFICAR y ENVIAR CORREO
+ok 23 - NOTIFICAR y ENVIAR CORREO
+  ---
+  duration_ms: 0.693027
+  type: 'test'
+  ...
+# Subtest: una tarea creada en el programa se usa después por su temporal
+ok 24 - una tarea creada en el programa se usa después por su temporal
+  ---
+  duration_ms: 0.638693
+  type: 'test'
+  ...
+# Subtest: traduce el ejemplo completo de docs/contrato-ir.md
+ok 25 - traduce el ejemplo completo de docs/contrato-ir.md
+  ---
+  duration_ms: 1.328499
+  type: 'test'
+  ...
+# Subtest: cada SI tiene su propio temporal de condición y su propia etiqueta
+ok 26 - cada SI tiene su propio temporal de condición y su propia etiqueta
+  ---
+  duration_ms: 0.852195
+  type: 'test'
+  ...
+# Subtest: un CREAR TAREA dentro de un SI también recibe su temporal
+ok 27 - un CREAR TAREA dentro de un SI también recibe su temporal
+  ---
+  duration_ms: 2.619137
+  type: 'test'
+  ...
+# Subtest: la IR es de solo datos: se puede pasar a JSON y regresar igual
+ok 28 - la IR es de solo datos: se puede pasar a JSON y regresar igual
+  ---
+  duration_ms: 1.165927
+  type: 'test'
+  ...
+# Subtest: generar no modifica el programa y siempre da la misma IR
+ok 29 - generar no modifica el programa y siempre da la misma IR
+  ---
+  duration_ms: 0.615739
+  type: 'test'
+  ...
+# Subtest: rechaza un programa sin validar
+ok 30 - rechaza un programa sin validar
+  ---
+  duration_ms: 1.063704
+  type: 'test'
+  ...
+# Subtest: describirIR muestra la IR como texto para revisarla
+ok 31 - describirIR muestra la IR como texto para revisarla
+  ---
+  duration_ms: 0.718122
+  type: 'test'
+  ...
+# Subtest: el generador IR y el ejecutor preservan la creación aun si falla el correo de un SI
+ok 32 - el generador IR y el ejecutor preservan la creación aun si falla el correo de un SI
+  ---
+  duration_ms: 5.736646
+  type: 'test'
+  ...
+# Subtest: el lexer entrega tokens con la forma y los tipos que espera el parser
+ok 33 - el lexer entrega tokens con la forma y los tipos que espera el parser
+  ---
+  duration_ms: 3.595854
+  type: 'test'
+  ...
+# Subtest: un programa válido llega del AST a la ejecución con los mismos efectos
+ok 34 - un programa válido llega del AST a la ejecución con los mismos efectos
+  ---
+  duration_ms: 5.440841
+  type: 'test'
+  ...
+# Subtest: un condicional falso generado por la IR no deja efectos ni correos
+ok 35 - un condicional falso generado por la IR no deja efectos ni correos
+  ---
+  duration_ms: 1.112921
+  type: 'test'
+  ...
+# Subtest: un fallo de transición detectado al ejecutar revierte la IR generada y explica el error
+ok 36 - un fallo de transición detectado al ejecutar revierte la IR generada y explica el error
+  ---
+  duration_ms: 1.700107
+  type: 'test'
+  ...
+# Subtest: una tarea creada bajo SI no se puede usar después ni llegar al generador de IR
+ok 37 - una tarea creada bajo SI no se puede usar después ni llegar al generador de IR
+  ---
+  duration_ms: 1.110706
+  type: 'test'
+  ...
+# Subtest: Tokeniza un programa válido de varias líneas con fechas, cadenas y estados
+ok 38 - Tokeniza un programa válido de varias líneas con fechas, cadenas y estados
+  ---
+  duration_ms: 3.403164
+  type: 'test'
+  ...
+# Subtest: Tokeniza enteros e identificadores correctamente
+ok 39 - Tokeniza enteros e identificadores correctamente
+  ---
+  duration_ms: 1.475007
+  type: 'test'
+  ...
+# Subtest: Reporta CARACTER_INVALIDO con línea y columna exactas y continúa analizando
+ok 40 - Reporta CARACTER_INVALIDO con línea y columna exactas y continúa analizando
+  ---
+  duration_ms: 0.387476
+  type: 'test'
+  ...
+# Subtest: Reporta CADENA_SIN_CERRAR cuando falta la comilla de cierre antes del salto de línea
+ok 41 - Reporta CADENA_SIN_CERRAR cuando falta la comilla de cierre antes del salto de línea
+  ---
+  duration_ms: 0.35463
+  type: 'test'
+  ...
+# Subtest: Distingue una fecha de títulos, destinatarios y mensajes con el mismo formato
+ok 42 - Distingue una fecha de títulos, destinatarios y mensajes con el mismo formato
+  ---
+  duration_ms: 0.50731
+  type: 'test'
+  ...
+# Subtest: simplifica una condición siempre verdadera tras CREAR TAREA y conserva la salida observable
+ok 43 - simplifica una condición siempre verdadera tras CREAR TAREA y conserva la salida observable
+  ---
+  duration_ms: 8.654245
+  type: 'test'
+  ...
+# Subtest: elimina código inalcanzable cuando la condición es siempre falsa
+ok 44 - elimina código inalcanzable cuando la condición es siempre falsa
+  ---
+  duration_ms: 0.899935
+  type: 'test'
+  ...
+# Subtest: elimina cambios de estado redundantes en un bloque lineal sin ocultar errores
+ok 45 - elimina cambios de estado redundantes en un bloque lineal sin ocultar errores
+  ---
+  duration_ms: 1.633766
+  type: 'test'
+  ...
+# Subtest: no elimina cambios de estado si hay una consulta observable intermedia
+ok 46 - no elimina cambios de estado si hay una consulta observable intermedia
+  ---
+  duration_ms: 1.035964
+  type: 'test'
+  ...
+# Subtest: Parsea el ejemplo 1 de la gramática y coincide exactamente con el contrato del AST
+ok 47 - Parsea el ejemplo 1 de la gramática y coincide exactamente con el contrato del AST
+  ---
+  duration_ms: 3.9872
+  type: 'test'
+  ...
+# Subtest: Parsea el ejemplo 2 con notificaciones, correo, fecha opcional y condicional
+ok 48 - Parsea el ejemplo 2 con notificaciones, correo, fecha opcional y condicional
+  ---
+  duration_ms: 0.926346
+  type: 'test'
+  ...
+# Subtest: Ignora líneas vacías y espacios extra al inicio y final del programa
+ok 49 - Ignora líneas vacías y espacios extra al inicio y final del programa
+  ---
+  duration_ms: 0.274372
+  type: 'test'
+  ...
+# Subtest: Programa vacío o solo con saltos de línea devuelve Programa sin instrucciones
+ok 50 - Programa vacío o solo con saltos de línea devuelve Programa sin instrucciones
+  ---
+  duration_ms: 0.217881
+  type: 'test'
+  ...
+# Subtest: Reporta ARGUMENTO_FALTANTE cuando una instrucción termina antes de tiempo
+ok 51 - Reporta ARGUMENTO_FALTANTE cuando una instrucción termina antes de tiempo
+  ---
+  duration_ms: 0.653239
+  type: 'test'
+  ...
+# Subtest: Reporta TOKEN_INESPERADO cuando el orden gramatical es incorrecto
+ok 52 - Reporta TOKEN_INESPERADO cuando el orden gramatical es incorrecto
+  ---
+  duration_ms: 0.383903
+  type: 'test'
+  ...
+# Subtest: Rechaza texto sobrante al final de una instrucción válida
+ok 53 - Rechaza texto sobrante al final de una instrucción válida
+  ---
+  duration_ms: 0.269841
+  type: 'test'
+  ...
+# Subtest: Rechaza condicionales anidados y comandos en minúsculas
+ok 54 - Rechaza condicionales anidados y comandos en minúsculas
+  ---
+  duration_ms: 0.216155
+  type: 'test'
+  ...
+# Subtest: Recupera por línea: reporta todos los errores y conserva las instrucciones válidas
+ok 55 - Recupera por línea: reporta todos los errores y conserva las instrucciones válidas
+  ---
+  duration_ms: 0.560284
+  type: 'test'
+  ...
+# Subtest: Integración: tokenizar -> parsear -> validarPrograma -> generarIR funciona de extremo a extremo
+ok 56 - Integración: tokenizar -> parsear -> validarPrograma -> generarIR funciona de extremo a extremo
+  ---
+  duration_ms: 2.86161
+  type: 'test'
+  ...
+# Subtest: listar tareas y usuarios mapea el formato de PostgreSQL al contrato JS
+ok 57 - listar tareas y usuarios mapea el formato de PostgreSQL al contrato JS
+  ---
+  duration_ms: 3.169707
+  type: 'test'
+  ...
+# Subtest: crear tarea usa parámetros y registra creación en la misma transacción
+ok 58 - crear tarea usa parámetros y registra creación en la misma transacción
+  ---
+  duration_ms: 3.859813
+  type: 'test'
+  ...
+# Subtest: asignar tarea conserva la asignación anterior en el historial
+ok 59 - asignar tarea conserva la asignación anterior en el historial
+  ---
+  duration_ms: 0.765412
+  type: 'test'
+  ...
+# Subtest: ejecutarEnTransaccion revierte y propaga el error del callback
+ok 60 - ejecutarEnTransaccion revierte y propaga el error del callback
+  ---
+  duration_ms: 1.213394
+  type: 'test'
+  ...
+# Subtest: rechaza un pool que no soporte transacciones
+ok 61 - rechaza un pool que no soporte transacciones
+  ---
+  duration_ms: 0.452878
+  type: 'test'
+  ...
+# Subtest: las tres tareas empiezan con los turnos confirmados
+ok 62 - las tres tareas empiezan con los turnos confirmados
+  ---
+  duration_ms: 13.535093
+  type: 'test'
+  ...
+# Subtest: en 100 años nadie hace dos tareas el mismo fin de semana
+ok 63 - en 100 años nadie hace dos tareas el mismo fin de semana
+  ---
+  duration_ms: 78.409818
+  type: 'test'
+  ...
+# Subtest: cada tarea mantiene su cuota justa a largo plazo
+ok 64 - cada tarea mantiene su cuota justa a largo plazo
+  ---
+  duration_ms: 57.093723
+  type: 'test'
+  ...
+# Subtest: los turnos son estables al ampliar el calendario, incluso con ajustes
+ok 65 - los turnos son estables al ampliar el calendario, incluso con ajustes
+  ---
+  duration_ms: 287.318043
+  type: 'test'
+  ...
+# Subtest: un choque aplaza a una persona y adelanta a la siguiente
+ok 66 - un choque aplaza a una persona y adelanta a la siguiente
+  ---
+  duration_ms: 2.760314
+  type: 'test'
+  ...
+# Subtest: se pueden añadir tareas nuevas sin duplicar personas
+ok 67 - se pueden añadir tareas nuevas sin duplicar personas
+  ---
+  duration_ms: 8.224806
+  type: 'test'
+  ...
+# Subtest: combinaciones de personas y tareas preservan el orden y evitan choques
+ok 68 - combinaciones de personas y tareas preservan el orden y evitan choques
+  ---
+  duration_ms: 14.023962
+  type: 'test'
+  ...
+# Subtest: valida tareas imposibles antes de calcular
+ok 69 - valida tareas imposibles antes de calcular
+  ---
+  duration_ms: 0.336432
+  type: 'test'
+  ...
+# Subtest: suggestOrder filtra, quita repetidos y rota el inicio
+ok 70 - suggestOrder filtra, quita repetidos y rota el inicio
+  ---
+  duration_ms: 0.322048
+  type: 'test'
+  ...
+# Subtest: el fin de semana incluye el domingo y maneja límites de mes, año e inicio
+ok 71 - el fin de semana incluye el domingo y maneja límites de mes, año e inicio
+  ---
+  duration_ms: 4.38617
+  type: 'test'
+  ...
+# Subtest: exporta eventos de sábado a domingo, filtra personas y respeta UTF-8 en ICS
+ok 72 - exporta eventos de sábado a domingo, filtra personas y respeta UTF-8 en ICS
+  ---
+  duration_ms: 18.22183
+  type: 'test'
+  ...
+# Subtest: escapa comas, punto y coma y saltos de línea en el ICS
+ok 73 - escapa comas, punto y coma y saltos de línea en el ICS
+  ---
+  duration_ms: 2.880275
+  type: 'test'
+  ...
+# Subtest: weeksInRange incluye los fines de semana que cruzan el rango
+ok 74 - weeksInRange incluye los fines de semana que cruzan el rango
+  ---
+  duration_ms: 1.9437
+  type: 'test'
+  ...
+# Subtest: countAssignments cuenta por persona y tarea dentro del rango
+ok 75 - countAssignments cuenta por persona y tarea dentro del rango
+  ---
+  duration_ms: 2.317024
+  type: 'test'
+  ...
+# Subtest: el rango corto también cuenta un solo fin de semana sin inventar turnos
+ok 76 - el rango corto también cuenta un solo fin de semana sin inventar turnos
+  ---
+  duration_ms: 2.128898
+  type: 'test'
+  ...
+# Subtest: API /api/salud, /api/validar, /api/ejecutar y /api/tablero funcionan de extremo a extremo
+ok 77 - API /api/salud, /api/validar, /api/ejecutar y /api/tablero funcionan de extremo a extremo
+  ---
+  duration_ms: 60.156326
+  type: 'test'
+  ...
+# Subtest: API sirve index.html y rechaza rutas fuera del proyecto o JSON inválido
+ok 78 - API sirve index.html y rechaza rutas fuera del proyecto o JSON inválido
+  ---
+  duration_ms: 15.319496
+  type: 'test'
+  ...
+# Subtest: API clasifica los errores por etapa con línea y columna, sin escribir tareas
+ok 79 - API clasifica los errores por etapa con línea y columna, sin escribir tareas
+  ---
+  duration_ms: 14.840104
+  type: 'test'
+  ...
+# Subtest: API expone el tablero con responsables, historial y estados de despacho
+ok 80 - API expone el tablero con responsables, historial y estados de despacho
+  ---
+  duration_ms: 5.754392
+  type: 'test'
+  ...
+# Subtest: API informa partial:true y conserva los resultados cuando falla un despacho tras el commit
+ok 81 - API informa partial:true y conserva los resultados cuando falla un despacho tras el commit
+  ---
+  duration_ms: 4.991433
+  type: 'test'
+  ...
+# Subtest: resuelve una tarea existente con su estado, tipo y operaciones
+ok 82 - resuelve una tarea existente con su estado, tipo y operaciones
+  ---
+  duration_ms: 2.708822
+  type: 'test'
+  ...
+# Subtest: resuelve un usuario existente
+ok 83 - resuelve un usuario existente
+  ---
+  duration_ms: 1.0551
+  type: 'test'
+  ...
+# Subtest: una tarea desconocida da TAREA_INEXISTENTE con su ubicación
+ok 84 - una tarea desconocida da TAREA_INEXISTENTE con su ubicación
+  ---
+  duration_ms: 0.41541
+  type: 'test'
+  ...
+# Subtest: un usuario desconocido da USUARIO_INEXISTENTE
+ok 85 - un usuario desconocido da USUARIO_INEXISTENTE
+  ---
+  duration_ms: 0.246527
+  type: 'test'
+  ...
+# Subtest: sin ubicación, el diagnóstico lleva línea y columna en null
+ok 86 - sin ubicación, el diagnóstico lleva línea y columna en null
+  ---
+  duration_ms: 0.220224
+  type: 'test'
+  ...
+# Subtest: la comparación es exacta: mayúsculas y acentos cuentan
+ok 87 - la comparación es exacta: mayúsculas y acentos cuentan
+  ---
+  duration_ms: 0.223394
+  type: 'test'
+  ...
+# Subtest: dos tareas con el mismo título dan TAREA_AMBIGUA y no se elige ninguna
+ok 88 - dos tareas con el mismo título dan TAREA_AMBIGUA y no se elige ninguna
+  ---
+  duration_ms: 0.321159
+  type: 'test'
+  ...
+# Subtest: dos usuarios con el mismo nombre dan USUARIO_AMBIGUO
+ok 89 - dos usuarios con el mismo nombre dan USUARIO_AMBIGUO
+  ---
+  duration_ms: 0.208193
+  type: 'test'
+  ...
+# Subtest: busca tareas y usuarios por id
+ok 90 - busca tareas y usuarios por id
+  ---
+  duration_ms: 0.48624
+  type: 'test'
+  ...
+# Subtest: una tarea creada en el programa se puede usar después sin escribir en el repositorio
+ok 91 - una tarea creada en el programa se puede usar después sin escribir en el repositorio
+  ---
+  duration_ms: 0.61491
+  type: 'test'
+  ...
+# Subtest: crear en el programa una tarea con un título que ya existe la vuelve ambigua
+ok 92 - crear en el programa una tarea con un título que ya existe la vuelve ambigua
+  ---
+  duration_ms: 0.258019
+  type: 'test'
+  ...
+# Subtest: la tabla acepta cualquier repositorio con el mismo contrato y lo lee una sola vez
+ok 93 - la tabla acepta cualquier repositorio con el mismo contrato y lo lee una sola vez
+  ---
+  duration_ms: 0.225878
+  type: 'test'
+  ...
+# Subtest: los símbolos son de solo lectura
+ok 94 - los símbolos son de solo lectura
+  ---
+  duration_ms: 0.53363
+  type: 'test'
+  ...
+# Subtest: carga al menos tres tareas con su estado y el nombre de su responsable
+ok 95 - carga al menos tres tareas con su estado y el nombre de su responsable
+  ---
+  duration_ms: 6.366816
+  type: 'test'
+  ...
+# Subtest: una tarea sin responsable o con un usuario desconocido queda como null
+ok 96 - una tarea sin responsable o con un usuario desconocido queda como null
+  ---
+  duration_ms: 0.344701
+  type: 'test'
+  ...
+# Subtest: agrupa por estado y siempre devuelve las cuatro columnas
+ok 97 - agrupa por estado y siempre devuelve las cuatro columnas
+  ---
+  duration_ms: 2.001037
+  type: 'test'
+  ...
+# Subtest: el historial va del más reciente al más antiguo y cada resultado corresponde a su tipo
+ok 98 - el historial va del más reciente al más antiguo y cada resultado corresponde a su tipo
+  ---
+  duration_ms: 0.359039
+  type: 'test'
+  ...
+# Subtest: filtra el historial por operaciones o por notificaciones y correos
+ok 99 - filtra el historial por operaciones o por notificaciones y correos
+  ---
+  duration_ms: 0.351995
+  type: 'test'
+  ...
+# Subtest: puede devolver listas vacías o fallar para probar esos estados
+ok 100 - puede devolver listas vacías o fallar para probar esos estados
+  ---
+  duration_ms: 3.648906
+  type: 'test'
+  ...
+# Subtest: acepta el ejemplo 1 de la gramática y resuelve las referencias
+ok 101 - acepta el ejemplo 1 de la gramática y resuelve las referencias
+  ---
+  duration_ms: 3.555739
+  type: 'test'
+  ...
+# Subtest: acepta el ejemplo 2 de la gramática: notificar, correo y condicional
+ok 102 - acepta el ejemplo 2 de la gramática: notificar, correo y condicional
+  ---
+  duration_ms: 0.648915
+  type: 'test'
+  ...
+# Subtest: acepta cambios de estado permitidos en cadena
+ok 103 - acepta cambios de estado permitidos en cadena
+  ---
+  duration_ms: 0.329976
+  type: 'test'
+  ...
+# Subtest: una tarea que no existe se reporta en la columna del título y explica cómo corregirla
+ok 104 - una tarea que no existe se reporta en la columna del título y explica cómo corregirla
+  ---
+  duration_ms: 0.506398
+  type: 'test'
+  ...
+# Subtest: un usuario que no existe se reporta en la columna del nombre
+ok 105 - un usuario que no existe se reporta en la columna del nombre
+  ---
+  duration_ms: 0.409141
+  type: 'test'
+  ...
+# Subtest: una tarea con título repetido es ambigua
+ok 106 - una tarea con título repetido es ambigua
+  ---
+  duration_ms: 0.339479
+  type: 'test'
+  ...
+# Subtest: una tarea completada no puede volver a otro estado
+ok 107 - una tarea completada no puede volver a otro estado
+  ---
+  duration_ms: 0.475769
+  type: 'test'
+  ...
+# Subtest: cambiar al mismo estado es una transición inválida
+ok 108 - cambiar al mismo estado es una transición inválida
+  ---
+  duration_ms: 0.249434
+  type: 'test'
+  ...
+# Subtest: el estado que cambia dentro del programa se toma en cuenta
+ok 109 - el estado que cambia dentro del programa se toma en cuenta
+  ---
+  duration_ms: 0.623743
+  type: 'test'
+  ...
+# Subtest: no se puede asignar una tarea completada o cancelada
+ok 110 - no se puede asignar una tarea completada o cancelada
+  ---
+  duration_ms: 1.508377
+  type: 'test'
+  ...
+# Subtest: un estado que no está en la lista es ESTADO_INVALIDO
+ok 111 - un estado que no está en la lista es ESTADO_INVALIDO
+  ---
+  duration_ms: 0.280508
+  type: 'test'
+  ...
+# Subtest: rechaza correo mal escrito, fecha inexistente y textos vacíos
+ok 112 - rechaza correo mal escrito, fecha inexistente y textos vacíos
+  ---
+  duration_ms: 0.342475
+  type: 'test'
+  ...
+# Subtest: reporta los errores de todas las instrucciones en orden
+ok 113 - reporta los errores de todas las instrucciones en orden
+  ---
+  duration_ms: 0.303203
+  type: 'test'
+  ...
+# Subtest: la tarea de la condición tiene que existir
+ok 114 - la tarea de la condición tiene que existir
+  ---
+  duration_ms: 0.213748
+  type: 'test'
+  ...
+# Subtest: la acción del SI también se valida
+ok 115 - la acción del SI también se valida
+  ---
+  duration_ms: 0.222347
+  type: 'test'
+  ...
+# Subtest: la acción sobre la misma tarea se revisa con el estado de la condición
+ok 116 - la acción sobre la misma tarea se revisa con el estado de la condición
+  ---
+  duration_ms: 0.289988
+  type: 'test'
+  ...
+# Subtest: después de un cambio dentro de un SI el estado ya no se conoce y no se marca error
+ok 117 - después de un cambio dentro de un SI el estado ya no se conoce y no se marca error
+  ---
+  duration_ms: 0.17801
+  type: 'test'
+  ...
+# Subtest: no se permite un SI dentro de otro SI
+ok 118 - no se permite un SI dentro de otro SI
+  ---
+  duration_ms: 0.186203
+  type: 'test'
+  ...
+# Subtest: validar no modifica el repositorio ni el AST, y cada validación empieza de cero
+ok 119 - validar no modifica el repositorio ni el AST, y cada validación empieza de cero
+  ---
+  duration_ms: 0.393153
+  type: 'test'
+  ...
+# Subtest: una tarea creada bajo SI no se considera existente en las líneas siguientes
+ok 120 - una tarea creada bajo SI no se considera existente en las líneas siguientes
+  ---
+  duration_ms: 0.26286
+  type: 'test'
+  ...
+1..120
+# tests 120
+# suites 0
+# pass 120
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 652.265139

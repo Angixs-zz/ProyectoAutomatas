@@ -31,6 +31,7 @@ El flujo completo de AutoTask descrito en [arquitectura-semana-1.md](arquitectur
 
 - **Lenguaje y compilador:** lexer (`src/lenguaje.js`), parser/AST (`src/lenguaje/parser.js`), tabla de símbolos (`src/semantica/tabla-simbolos.js`), validación semántica (`src/semantica/validador.js`), generador de IR (`src/ir/generador-ir.js`), optimizador de IR (`src/ir/optimizador.js`) y ejecutor transaccional (`src/ejecutor/ejecutor.js`).
 - **API y servicios:** servidor Node.js (`src/api/servidor.js`, iniciado con `npm start`) con `/api/validar`, `/api/ejecutar`, `/api/tablero` y `/api/salud`, repositorio PostgreSQL (`src/persistencia/repositorio-postgres.js`, `src/persistencia/migraciones.js`, `db/init/`) con respaldo en memoria para pruebas locales, y cliente SMTP para Mailpit (`src/ejecutor/correo-smtp.js`).
+- **Contrato HTTP:** solicitudes, respuestas, códigos de error, diagnósticos por etapa y comportamiento de `partial: true` en [docs/contrato-api.md](docs/contrato-api.md).
 - **Interfaz:** consola de instrucciones (`consola.js`), tablero por estado e historial (`tablero.js`) y calendario de rotaciones (`app.js`, `schedule.js`).
 
 ## Ejecutar con Docker Compose

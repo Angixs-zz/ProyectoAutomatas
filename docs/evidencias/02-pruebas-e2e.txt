@@ -1,0 +1,44 @@
+
+> proyecto-automatas@1.0.0 test:e2e
+> node --test e2e/autotask.e2e.mjs
+
+TAP version 13
+# Subtest: E2E Docker: web disponible y /api/salud conectado a PostgreSQL
+ok 1 - E2E Docker: web disponible y /api/salud conectado a PostgreSQL
+  ---
+  duration_ms: 92.601447
+  type: 'test'
+  ...
+# Subtest: E2E Docker: flujo completo de comandos, condicionales, tablero, historial y Mailpit
+ok 2 - E2E Docker: flujo completo de comandos, condicionales, tablero, historial y Mailpit
+  ---
+  duration_ms: 54.447746
+  type: 'test'
+  ...
+# Subtest: E2E Docker: rechaza errores por etapa y hace rollback real en PostgreSQL
+ok 3 - E2E Docker: rechaza errores por etapa y hace rollback real en PostgreSQL
+  ---
+  duration_ms: 41.941849
+  type: 'test'
+  ...
+# Subtest: E2E: compara ejecución de IR sin optimizar y optimizada preservando efectos
+ok 4 - E2E: compara ejecución de IR sin optimizar y optimizada preservando efectos
+  ---
+  duration_ms: 8.156006
+  type: 'test'
+  ...
+# Subtest: E2E PostgreSQL: manejo seguro de error parcial post-commit sin reintentos
+ok 5 - E2E PostgreSQL: manejo seguro de error parcial post-commit sin reintentos
+  ---
+  duration_ms: 84.252067
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 587.708356

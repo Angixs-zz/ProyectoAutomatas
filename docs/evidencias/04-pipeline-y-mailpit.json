@@ -1,0 +1,111 @@
+{
+  "fechaCaptura": "2026-11-21T03:12:11.213Z",
+  "commitBase": "3b96a25",
+  "salud": {
+    "ok": true,
+    "almacenamiento": "postgres"
+  },
+  "validarConOptimizacion": {
+    "ok": true,
+    "modo": "validacion",
+    "resultados": [],
+    "diagnosticos": [],
+    "optimizaciones": [
+      "simplificacion_condiciones_constantes"
+    ]
+  },
+  "errorLexico": {
+    "ok": false,
+    "modo": "ejecucion",
+    "resultados": [],
+    "diagnosticos": [
+      {
+        "etapa": "lexica",
+        "codigo": "CARACTER_INVALIDO",
+        "mensaje": "Carácter '@' no reconocido fuera de una cadena de texto.",
+        "linea": 1,
+        "columna": 15
+      }
+    ]
+  },
+  "errorSintactico": {
+    "ok": false,
+    "modo": "ejecucion",
+    "resultados": [],
+    "diagnosticos": [
+      {
+        "etapa": "sintactica",
+        "codigo": "ARGUMENTO_FALTANTE",
+        "mensaje": "Se esperaba una CADENA con el título de la tarea después de 'TAREA'.",
+        "linea": 1,
+        "columna": 12
+      }
+    ]
+  },
+  "errorSemantico": {
+    "ok": false,
+    "modo": "ejecucion",
+    "resultados": [],
+    "diagnosticos": [
+      {
+        "etapa": "semantica",
+        "codigo": "TAREA_INEXISTENTE",
+        "mensaje": "CONSULTAR TAREA: No existe la tarea «No existe». Revisa el título o créala antes con CREAR TAREA.",
+        "linea": 1,
+        "columna": 17
+      }
+    ]
+  },
+  "errorEjecucion": {
+    "ok": false,
+    "modo": "ejecucion",
+    "resultados": [],
+    "diagnosticos": [
+      {
+        "etapa": "ejecucion",
+        "codigo": "TRANSICION_INVALIDA",
+        "mensaje": "CAMBIAR ESTADO: la tarea «Preparar informe» no puede pasar de COMPLETADA a EN_PROGRESO.",
+        "linea": 2,
+        "columna": 1
+      }
+    ]
+  },
+  "mailpitResumen": {
+    "total": 9,
+    "ultimos": [
+      {
+        "ID": "6snnMRT901cPSHEMyd5EIy",
+        "To": [
+          {
+            "Name": "",
+            "Address": "prueba-e2e-1795230719085@ejemplo.com"
+          }
+        ],
+        "Subject": "Notificación de prueba · AutoTask",
+        "Created": "2026-11-21T03:11:59.113Z"
+      },
+      {
+        "ID": "5c3rr61c9IUniWC1C3mhbG",
+        "To": [
+          {
+            "Name": "",
+            "Address": "prueba-e2e-1795230544746@ejemplo.com"
+          }
+        ],
+        "Subject": "Notificación de prueba · AutoTask",
+        "Created": "2026-11-21T03:09:04.777Z"
+      },
+      {
+        "ID": "4fqHhX3yqzHoMZhHV0oJiv",
+        "To": [
+          {
+            "Name": "",
+            "Address": "prueba-e2e-1795230413875@ejemplo.com"
+          }
+        ],
+        "Subject": "Notificación de prueba · AutoTask",
+        "Created": "2026-11-21T03:06:53.941Z"
+      }
+    ]
+  }
+}

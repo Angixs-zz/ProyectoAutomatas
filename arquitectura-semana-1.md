@@ -1,5 +1,7 @@
 # AutoTask · Arquitectura y contratos iniciales
 
+> **Estado del documento (2026-11-21).** Este texto conserva las **decisiones iniciales** de la Semana 1 y su redacción original. La implementación final ya está integrada en `main`; las diferencias entre la propuesta y lo entregado se documentan en la [sección 8](#8-implementación-final-verificada-2026-11-21). No se eliminó la documentación original para mantener trazabilidad entre el diseño y el resultado.
+
 Borrador para revisión del equipo · [Issue #1](https://github.com/Angixs-zz/ProyectoAutomatas/issues/1). **No se ha registrado todavía la aprobación de Yareli ni del equipo.** Los ejemplos de sintaxis, el motor y la base de datos son propuestas, no funcionalidades implementadas.
 
 ## Alcance y base del calendario
@@ -157,3 +159,116 @@ Abrir `http://localhost:8080`. El calendario y sus pruebas funcionan sin instala
 | Edwin y Diego | Efectos del ejecutor, comportamiento ante un fallo durante la ejecución y servicios de Docker. |
 
 Cada responsable parte de `main`, abre su rama y enlaza el issue en su PR. El equipo revisa el PR antes de integrar y actualiza el avance en el [tablero de AutoTask](https://github.com/users/Angixs-zz/projects/4/views/1).
+
+---
+
+## 8. Implementación final verificada (2026-11-21)
+
+Esta sección no reemplaza las decisiones iniciales: las contrasta con el código que quedó integrado en `main`. La verificación se hizo sobre el commit de `main` posterior a los PR #36 y #37.
+
+### 8.1 Flujo real del compilador y del ejecutor
+
+El flujo implementado coincide con el trazado inicial y añade el contrato HTTP:
+
+```mermaid
+flowchart LR
+    A[Consola web\nconsola.js] -->|POST /api/validar o /api/ejecutar| B[API\nsrc/api/servidor.js]
+    B --> C[Motor\nsrc/motor/ejecutar-programa.js]
+    C -->|texto| D[Lexer\nsrc/lenguaje.js]
+    D -->|tokens con linea/columna| E[Parser\nsrc/lenguaje/parser.js]
+    E -->|AST| F[Tabla de símbolos\nsrc/semantica/tabla-simbolos.js]
+    F --> G[Validación semántica\nsrc/semantica/validador.js]
+    G -->|AST validado + referencias| H[Generador de IR\nsrc/ir/generador-ir.js]
+    H -->|ProgramaIR| I[Optimizador\nsrc/ir/optimizador.js]
+    I -->|IR optimizada| J[Ejecutor\nsrc/ejecutor/ejecutor.js]
+    J --> K[(PostgreSQL\nusuarios, tareas, historial, notificaciones)]
+    J --> L[Notificaciones internas]
+    J --> M[SMTP de pruebas\nMailpit]
+    J -->|resultados y diagnósticos| B
+    B -->|JSON| A
+    A --> N[Tablero e historial\ntablero.js]
+    N -->|GET /api/tablero| B
+```
+
+La API ejecuta el pipeline en dos modos:
+
+- `validacion`: lexer → parser → tabla de símbolos → semántica → IR → optimizador. No llama al ejecutor.
+- `ejecucion`: el mismo pipeline y después `ejecutarIR`.
+
+### 8.2 Mapa de módulos implementados
+
+| Módulo | Archivo principal | Entrada | Salida | Pruebas |
+| --- | --- | --- | --- | --- |
+| Lexer | `src/lenguaje.js` | Texto del programa | Tokens `{tipo, valor, inicio, fin}` y diagnósticos léxicos | `tests/lexer.test.js` |
+| Parser / AST | `src/lenguaje/parser.js` | Tokens | AST `Programa` con instrucciones y ubicaciones, o diagnósticos sintácticos | `tests/parser.test.js` |
+| Tabla de símbolos | `src/semantica/tabla-simbolos.js` | Repositorio de lectura | Símbolos de tareas y usuarios; errores de inexistencia/ambigüedad | `tests/tabla-simbolos.test.js` |
+| Validación semántica | `src/semantica/validador.js` | AST + tabla de símbolos | AST con referencias resueltas o diagnósticos semánticos | `tests/validador.test.js` |
+| Generador de IR | `src/ir/generador-ir.js` | AST validado | `ProgramaIR` de solo datos | `tests/generador-ir.test.js` |
+| Optimizador | `src/ir/optimizador.js` | `ProgramaIR` | `ProgramaIR` equivalente con metadatos de optimización | `tests/optimizador.test.js` |
+| Ejecutor | `src/ejecutor/ejecutor.js` | IR + servicios | Resultados, errores de ejecución y fallos parciales | `tests/ejecutor.test.js` |
+| Orquestador | `src/motor/ejecutar-programa.js` | Texto + modo | Respuesta completa del programa | `tests/integracion.test.js` |
+| API HTTP | `src/api/servidor.js` | Peticiones HTTP | JSON de salud, tablero, validación y ejecución | `tests/servidor.test.js` |
+| Persistencia PostgreSQL | `src/persistencia/repositorio-postgres.js` | Operaciones del ejecutor | Tareas, historial y notificaciones persistidas | `tests/repositorio-postgres.test.js` |
+| Correo SMTP | `src/ejecutor/correo-smtp.js` | Destinatario y mensaje | Solicitud aceptada por Mailpit | `tests/correo-smtp.test.js` |
+| Consola web | `consola.js` | Texto de la persona usuaria | Llamadas a `/api/validar` y `/api/ejecutar`; estados de carga/error | `tests/consola-ejemplos.test.js` |
+| Tablero e historial | `tablero.js` | `GET /api/tablero` | Columnas por estado e historial filtrable | `tests/tablero-ejemplos.test.js` |
+| Calendario heredado | `app.js`, `schedule.js` | Configuración local | Rotaciones y exportación `.ics` | `tests/schedule.test.js` |
+| Suite E2E | `e2e/autotask.e2e.mjs` | Docker Compose | Verificación app + PostgreSQL + Mailpit | `npm run test:e2e` |
+
+### 8.3 Decisiones iniciales frente a la implementación final
+
+| Tema | Decisión inicial (Semana 1) | Implementación final |
+| --- | --- | --- |
+| Stack | Se propuso HTML/CSS/JS para la interfaz y Node.js para el motor/API; se dejó abierto el framework. | Node.js 22, HTML/CSS/JavaScript sin framework, PostgreSQL 16 y Docker Compose. No se usó React ni FastAPI. |
+| Sintaxis | Ejemplos provisionales con distintas formas (`ASIGNAR "t" A "u"`, estados en minúsculas). | Gramática EBNF cerrada: `CREAR TAREA "t"`, `ASIGNAR TAREA "t" A "u"`, estados en mayúsculas. Ver `docs/gram_tica_formal_autotask.md`. |
+| Identificación | Se discutió usar IDs explícitos o títulos. | Las tareas se referencian por **título exacto** entre comillas; los usuarios por **nombre exacto**. Los IDs (`task_N`, `user_N`) son internos. |
+| API | Se propuso `POST /api/programas` con `{texto, modo}`. | Se implementaron rutas separadas: `POST /api/validar` y `POST /api/ejecutar`, con `{programa}` (o alias `texto`), más `GET /api/salud` y `GET /api/tablero`. Ver `docs/contrato-api.md`. |
+| Errores de programa | Se discutió entre HTTP 200/400/422. | Los errores léxicos, sintácticos, semánticos y de ejecución devuelven **HTTP 200** con `ok: false` y `diagnosticos`. Los 400/405/500 se reservan para la petición o el servidor. |
+| Resultados | Formato provisional con `task_123` y `en_cola`. | Formato estable por operación, con `linea`, `operacion`, IDs, títulos y estados. `en_cola` significa aceptado, no entregado. Los detalles están en `docs/contrato-ir.md` y `docs/contrato-api.md`. |
+| Estados | Pendiente de acuerdo. | `PENDIENTE`, `EN_PROGRESO`, `COMPLETADA`, `CANCELADA`; transiciones en `src/semantica/validador.js`. `COMPLETADA` y `CANCELADA` son finales. |
+| Persistencia | PostgreSQL como fuente de verdad; `localStorage` solo para el calendario. | Se cumple: PostgreSQL guarda usuarios, tareas, historial y notificaciones. El calendario conserva su configuración en `localStorage`. Sin PostgreSQL, la API usa memoria para pruebas. |
+| Transacciones | Se acordó que un fallo no dejara efectos parciales. | Las operaciones de tareas se ejecutan en una transacción. Notificaciones y correos se despachan después del `COMMIT`; un fallo posterior se informa con `partial: true` y estados `incierto`/`no_procesado`. |
+| Condicional | `SI ... ENTONCES` con una acción simple. | Implementado sin anidamiento. Se traduce a `EVALUAR_ESTADO`, `SALTAR_SI_FALSO`, acción y `ETIQUETA`. |
+| Repetición | Opcional según el PDF. | **No implementada**; queda como limitación. |
+| Docker | `docker compose up --build` con frontend, backend, PostgreSQL y Mailpit. | `app` sirve frontend y API en un solo servicio, más `postgres` y `mailpit`. No hay servicio separado de frontend. |
+| Correo | SMTP de pruebas con Mailpit. | Cliente SMTP nativo en `src/ejecutor/correo-smtp.js`; los mensajes se verifican en Mailpit (`http://localhost:8025`). |
+| Tablero | Panel de dispositivos simulado o tablero de tareas. | Al ser la opción AutoTask, el panel visual es el **tablero de tareas** por estado, con historial. |
+
+### 8.4 Persistencia, SMTP y API en la entrega final
+
+- **PostgreSQL:** `db/init/001_esquema.sql` crea `usuarios`, `tareas`, `historial_tareas` y `notificaciones`; `002_datos_demo.sql` carga usuarios y tareas de ejemplo; `003_alinear_historial_notificaciones.sql` alinea estados y columnas con el ejecutor y el tablero. El detalle está en `docs/persistencia.md`.
+- **Repositorio:** `crearRepositorioPostgres(pool)` implementa lectura, escritura transaccional, historial y notificaciones. Cumple el contrato que esperan la semántica y el ejecutor.
+- **SMTP:** Mailpit recibe los correos en el puerto SMTP interno `1025`; la interfaz de inspección está en `8025`. El envío no requiere cuentas reales.
+- **API:** `src/api/servidor.js` expone `/api/salud`, `/api/tablero`, `/api/validar` y `/api/ejecutar`, y sirve los archivos estáticos de la consola, el tablero y el calendario.
+- **Frontend:** `index.html` integra la consola, el tablero y el calendario heredado. `consola.js` y `tablero.js` consumen la API; `app.js` y `schedule.js` mantienen el calendario de TareasHogar.
+
+### 8.5 Arranque y flujo de trabajo del equipo
+
+El arranque vigente no requiere cambiar a `feature/lt-1`:
+
+```sh
+git switch main
+git pull --ff-only origin main
+npm test
+npm start                 # API + frontend en http://localhost:8080
+# o, con PostgreSQL y Mailpit:
+cp .env.example .env
+docker compose up --build
+```
+
+Flujo de trabajo conservado:
+
+1. Cada responsable parte de `main` y crea una rama `feature/<área>` o `fix/<tema>`.
+2. El PR enlaza su issue, describe el cambio, indica cómo probarlo y conserva la autoría de los commits.
+3. El equipo revisa el PR antes de fusionarlo; no se usa `git push --force` ni se borran ramas con trabajo.
+4. El avance se refleja en el [tablero de AutoTask](https://github.com/users/Angixs-zz/projects/4/views/1).
+5. `main` se mantiene ejecutable: `npm test` no requiere Docker y `npm run test:e2e` valida la integración real.
+
+### 8.6 Evidencia de cumplimiento del issue #1
+
+| Criterio | Evidencia |
+| --- | --- |
+| Diagrama y mapa de módulos con entradas y salidas | Diagrama de 8.1 y tabla de 8.2; mapa original conservado en la sección 2. |
+| Acuerdo escrito sobre catálogo, alcance, resultados, errores, tecnologías y persistencia | Secciones 8.3–8.4, `docs/gram_tica_formal_autotask.md`, `docs/contrato-ir.md`, `docs/contrato-api.md` y `docs/persistencia.md`. |
+| El equipo puede localizar la base, levantarla y seguir ramas → PR → revisión → Kanban | Sección 8.5, `README.md`, `docker-compose.yml`, `.env.example` y el tablero de GitHub Projects. |
+| Verificación ejecutable | `npm test`: 120/120 pruebas; `npm run test:e2e`: 5/5 pruebas contra Docker Compose. |

@@ -185,3 +185,5 @@ export function tokenizar(entrada) {
 
   return { tokens, diagnosticos };
 }
+
+export { parsear } from "./lenguaje/parser.js";

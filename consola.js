@@ -1,5 +1,6 @@
 // Consola AutoTask (#7): conecta el cuadro de texto y los botones con la API.
-// Por ahora usa las respuestas de ejemplo de consola-ejemplos.js. En #16 enviarPrograma() llamará a la API real.
+// Por defecto usa /api/validar y /api/ejecutar; consola-ejemplos.js aporta los
+// ejemplos y la respuesta simulada de la casilla "Simular que la API no responde".
 import { EJEMPLOS, enviarPrograma } from './consola-ejemplos.js';
 
 const entrada = document.querySelector('#console-input');

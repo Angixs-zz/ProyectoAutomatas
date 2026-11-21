@@ -2,6 +2,8 @@
 // Se ejecuta de forma opcional con `npm run test:e2e`; `npm test` no requiere Docker.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { tokenizar, parsear } from '../src/lenguaje.js';
 import { validarPrograma } from '../src/semantica/validador.js';
 import { generarIR } from '../src/ir/generador-ir.js';
@@ -16,6 +18,23 @@ import { ejecutarPrograma } from '../src/motor/ejecutar-programa.js';
 const APP_URL = process.env.AUTOTASK_URL ?? 'http://localhost:8080';
 const MAILPIT_URL = process.env.MAILPIT_URL ?? 'http://localhost:8025';
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://autotask:autotask_dev@localhost:5432/autotask';
+const execFileAsync = promisify(execFile);
+
+async function esperarSaludPostgres(intentos = 20, esperaMs = 500) {
+  for (let i = 0; i < intentos; i += 1) {
+    try {
+      const res = await fetch(`${APP_URL}/api/salud`);
+      if (res.status === 200) {
+        const salud = await res.json();
+        if (salud.ok && salud.almacenamiento === 'postgres') return;
+      }
+    } catch {
+      // El servicio sigue reiniciándose
+    }
+    await new Promise((r) => setTimeout(r, esperaMs));
+  }
+  throw new Error('La API y PostgreSQL no volvieron a responder /api/salud tras el reinicio.');
+}
 
 async function peticionJSON(ruta, { method = 'GET', body } = {}) {
   const res = await fetch(`${APP_URL}${ruta}`, {
@@ -186,4 +205,44 @@ test('E2E PostgreSQL: manejo seguro de error parcial post-commit sin reintentos'
   } finally {
     await pool.end();
   }
+});
+
+// (#44 EX-6): verifica persistencia real tras reiniciar app y postgres sin borrar el volumen.
+test('E2E Docker: el estado de tareas e historial persisten tras reiniciar app y postgres sin -v', async () => {
+  const etiqueta = `Persiste-${Date.now()}`;
+  const titulo = `Tarea ${etiqueta}`;
+  const mensaje = `Aviso persistente ${etiqueta}`;
+
+  const ej = await peticionJSON('/api/ejecutar', {
+    method: 'POST',
+    body: {
+      programa: [
+        `CREAR TAREA "${titulo}" FECHA "2026-11-30"`,
+        `ASIGNAR TAREA "${titulo}" A "Diego"`,
+        `CAMBIAR ESTADO TAREA "${titulo}" A EN_PROGRESO`,
+        `NOTIFICAR A "Diego" MENSAJE "${mensaje}"`,
+      ].join('\n'),
+    },
+  });
+  assert.equal(ej.ok, true);
+
+  await execFileAsync('docker', ['compose', 'restart', 'app', 'postgres'], {
+    cwd: process.cwd(),
+    env: process.env,
+  });
+  await esperarSaludPostgres();
+
+  const tablero = await peticionJSON('/api/tablero');
+  const tarea = tablero.tareas.find((t) => t.titulo === titulo);
+  assert.ok(tarea, 'La tarea debe seguir existiendo en PostgreSQL tras reiniciar los contenedores');
+  assert.equal(tarea.estado, 'EN_PROGRESO');
+  assert.equal(tarea.responsable, 'Diego');
+  assert.ok(
+    tablero.historial.some((h) => h.operacion === 'crear' && h.detalle?.includes(titulo)),
+    'El historial de creación debe conservarse tras reiniciar',
+  );
+  assert.ok(
+    tablero.historial.some((h) => h.operacion === 'notificar' && h.tipo === 'notificacion' && h.detalle?.includes(mensaje)),
+    'La notificación en historial debe conservarse tras reiniciar',
+  );
 });

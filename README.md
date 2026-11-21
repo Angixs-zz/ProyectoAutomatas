@@ -15,15 +15,16 @@ El punto de partida es [TareasHogar en el commit `dfbc59b`](https://github.com/A
 
 ## Ejecutar localmente
 
-Con Node.js 22 o superior y Python 3, clona el repositorio y levanta el servidor estático.
+Con Node.js 22 o superior, clona el repositorio, instala la dependencia de PostgreSQL y levanta la API con el frontend.
 
 ```sh
 git clone https://github.com/Angixs-zz/ProyectoAutomatas.git
 cd ProyectoAutomatas
+npm install
 npm start
 ```
 
-Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas del calendario, usa `npm test`. El proyecto base funciona sin instalar paquetes adicionales.
+Abre [http://localhost:8080](http://localhost:8080). Sin `DATABASE_URL` ni `SMTP_HOST`, la API usa almacenamiento y correo en memoria, suficiente para probar la interfaz. Para persistencia real y correo de prueba, usa Docker Compose o define `DATABASE_URL` y `SMTP_HOST`. Las pruebas se ejecutan con `npm test`.
 
 ## Estado de integración
 
@@ -33,6 +34,13 @@ El flujo completo de AutoTask descrito en [arquitectura-semana-1.md](arquitectur
 - **API y servicios:** servidor Node.js (`src/api/servidor.js`, iniciado con `npm start`) con `/api/validar`, `/api/ejecutar`, `/api/tablero` y `/api/salud`, repositorio PostgreSQL (`src/persistencia/repositorio-postgres.js`, `src/persistencia/migraciones.js`, `db/init/`) con respaldo en memoria para pruebas locales, y cliente SMTP para Mailpit (`src/ejecutor/correo-smtp.js`).
 - **Contrato HTTP:** solicitudes, respuestas, códigos de error, diagnósticos por etapa y comportamiento de `partial: true` en [docs/contrato-api.md](docs/contrato-api.md).
 - **Interfaz:** consola de instrucciones (`consola.js`), tablero por estado e historial (`tablero.js`) y calendario de rotaciones (`app.js`, `schedule.js`).
+
+### Documentación de entrega
+
+- [Guía final](docs/guia-final.md): instalación, arquitectura, base de datos, pruebas y límites.
+- [Matriz de requisitos](docs/matriz-requisitos.md): contraste del PDF con el código y evidencias.
+- [Guion de demostración](docs/guion-demostracion.md): secuencia, capturas y presentadores.
+- [Índice de documentación](docs/README.md): gramática, AST, semántica, IR, API y persistencia.
 
 ## Ejecutar con Docker Compose
 

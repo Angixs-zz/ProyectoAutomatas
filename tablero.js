@@ -1,6 +1,7 @@
 // Tablero de tareas e historial (#8): muestra las tareas de AutoTask por estado y el historial de operaciones.
-// Va separado del calendario de TareasHogar. Por ahora usa los datos de ejemplo de tablero-ejemplos.js;
-// en #16 cargarTablero() pedirá los datos a la API real.
+// Va separado del calendario de TareasHogar. Por defecto carga GET /api/tablero;
+// tablero-ejemplos.js aporta las utilidades de agrupación/filtrado y los datos simulados
+// de las casillas "Simular que la API no responde" y "Simular que no hay datos".
 import { ESTADOS_TABLERO, agruparPorEstado, filtrarHistorial, cargarTablero } from './tablero-ejemplos.js';
 
 const seccion = document.querySelector('#tablero');

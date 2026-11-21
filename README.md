@@ -30,7 +30,7 @@ Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas d
 El flujo completo de AutoTask descrito en [arquitectura-semana-1.md](arquitectura-semana-1.md) está integrado en `main`:
 
 - **Lenguaje y compilador:** lexer (`src/lenguaje.js`), parser/AST (`src/lenguaje/parser.js`), tabla de símbolos (`src/semantica/tabla-simbolos.js`), validación semántica (`src/semantica/validador.js`), generador de IR (`src/ir/generador-ir.js`), optimizador de IR (`src/ir/optimizador.js`) y ejecutor transaccional (`src/ejecutor/ejecutor.js`).
-- **API y servicios:** servidor Node.js (`src/api/servidor.js`, iniciado con `npm start`) con `/api/validar`, `/api/ejecutar`, `/api/tablero` y `/api/salud`, servicios en memoria para ejecución local (`src/ejecutor/servicios-memoria.js`), cliente SMTP para Mailpit (`src/ejecutor/correo-smtp.js`) y soporte opcional para conectar el repositorio PostgreSQL cuando se integre el PR #32 (`src/persistencia/repositorio-postgres.js`, `db/init/`).
+- **API y servicios:** servidor Node.js (`src/api/servidor.js`, iniciado con `npm start`) con `/api/validar`, `/api/ejecutar`, `/api/tablero` y `/api/salud`, repositorio PostgreSQL (`src/persistencia/repositorio-postgres.js`, `src/persistencia/migraciones.js`, `db/init/`) con respaldo en memoria para pruebas locales, y cliente SMTP para Mailpit (`src/ejecutor/correo-smtp.js`).
 - **Interfaz:** consola de instrucciones (`consola.js`), tablero por estado e historial (`tablero.js`) y calendario de rotaciones (`app.js`, `schedule.js`).
 
 ## Ejecutar con Docker Compose
@@ -59,8 +59,31 @@ docker compose up --build
 
 Las variables disponibles se encuentran en `.env.example` (`APP_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`, `DATABASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `MAILPIT_UI_PORT`, `SMTP_FROM`).
 
-Los scripts `.sql` o `.sh` colocados en `db/init/` se ejecutan automáticamente al inicializar el volumen de PostgreSQL por primera vez (en espera del esquema y datos semilla del issue `#5`). Para reiniciar desde cero incluyendo la base de datos:
+Los scripts `.sql` colocados en `db/init/` (`001_esquema.sql`, `002_datos_demo.sql`, `003_alinear_historial_notificaciones.sql`) se ejecutan automáticamente al inicializar el volumen de PostgreSQL por primera vez y mediante `aplicarMigraciones` al arrancar la aplicación. Para reiniciar desde cero incluyendo la base de datos:
 
 ```sh
 docker compose down -v
 ```
+
+### Pruebas automatizadas y verificación en Mailpit
+
+1. **Pruebas unitarias y de integración en memoria (no requieren Docker):**
+
+```sh
+npm test
+```
+
+2. **Suite E2E opcional contra Docker Compose (PostgreSQL + Mailpit):**
+
+Con los contenedores levantados (`docker compose up -d --build`, o definiendo `POSTGRES_PORT=55432` si el puerto `5432` del host está ocupado):
+
+```sh
+DATABASE_URL=postgresql://autotask:autotask_dev@localhost:5432/autotask npm run test:e2e
+```
+
+(Si usaste `POSTGRES_PORT=55432`, ajusta el puerto en `DATABASE_URL`.)
+
+3. **Verificar el envío de correos en Mailpit:**
+
+- Abre [http://localhost:8025](http://localhost:8025) en el navegador después de ejecutar un comando `ENVIAR CORREO A "..." MENSAJE "..."` desde la consola web ([http://localhost:8080](http://localhost:8080)) o tras correr `npm run test:e2e`.
+- También puedes consultar la bandeja vía API: `curl http://localhost:8025/api/v1/messages`.

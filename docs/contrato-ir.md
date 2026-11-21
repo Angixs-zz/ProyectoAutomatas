@@ -96,10 +96,10 @@ El optimizador recibe un `ProgramaIR`, devuelve un nuevo `ProgramaIR` sin mutar 
 
 ## 4. Reglas del ejecutor (`#12 · EX-1`)
 
-### 4.1 Política transaccional todo-o-nada (acordada con BE-4)
+### 4.1 Transacción de tareas y despachos posteriores
 1. Todas las lecturas y escrituras de tareas (`CREAR_TAREA`, `ASIGNAR_TAREA`, `CAMBIAR_ESTADO`, `CONSULTAR_TAREA`, `LISTAR_TAREAS`) se ejecutan dentro de una **única transacción** (`ejecutarEnTransaccion`).
 2. `NOTIFICAR` y `ENVIAR_CORREO` **no escriben ni envían correos inmediatamente**: se acumulan en una cola en memoria durante la corrida del programa.
-3. Si cualquier instrucción falla en tiempo de ejecución:
+3. Si una instrucción falla **antes de confirmar la transacción**:
    - Se revierte (`ROLLBACK`) toda la transacción en base de datos.
    - Se descarta la cola de notificaciones y correos (cero correos fantasma).
    - El ejecutor devuelve:
@@ -111,10 +111,11 @@ El optimizador recibe un `ProgramaIR`, devuelve un nuevo `ProgramaIR` sin mutar 
        diagnosticos: [{ etapa: 'ejecucion', codigo, mensaje, linea, columna }],
      }
      ```
-4. Solo cuando todas las instrucciones terminan sin errores:
-   - Se confirma (`COMMIT`) la transacción.
-   - Se persisten las notificaciones acumuladas y se envían los correos pendientes por SMTP (Mailpit en pruebas).
-   - Se devuelve `{ ok: true, modo: 'ejecucion', resultados, diagnosticos: [] }`.
+4. Cuando las instrucciones terminan sin errores, se confirma (`COMMIT`) la transacción y solo entonces se registran notificaciones y se solicitan envíos SMTP:
+   - Si todos los despachos son aceptados, se devuelve `{ ok: true, modo: 'ejecucion', resultados, diagnosticos: [] }`. `estado: 'en_cola'` significa aceptado por el servicio, **no entrega confirmada al destinatario**.
+   - Si un despacho falla **después del commit**, las tareas y los despachos anteriores no se pueden revertir. Se devuelve `{ ok: false, partial: true, modo: 'ejecucion', resultados, diagnosticos: [...] }`. A diferencia del error anterior al commit, `resultados` conserva las operaciones ya confirmadas y las acciones solicitadas. La acción que lanzó el error queda `estado: 'incierto'` (el servicio pudo haberla recibido antes de fallar); las siguientes quedan `estado: 'no_procesado'`. Los despachos anteriores aceptados conservan `en_cola`. Para un `SI`, el estado de su acción se encuentra en `accion.estado`.
+   - El frontend/API debe distinguir el error previo al commit (`ok: false`, sin `partial`, `resultados: []`), el error posterior (`ok: false`, `partial: true`, resultados posiblemente no vacíos) y el éxito (`ok: true`, sin `partial`). Un `partial` no implica que *todas* las acciones de `resultados` hayan completado su despacho.
+   - **Nunca reintentar automáticamente todo el programa** después de un fallo parcial: duplicaría tareas, notificaciones o correos cuya entrega sea incierta. La cola persistente y los reintentos idempotentes son trabajo futuro de backend; no se implementan aquí.
 
 ### 4.2 Revalidación de estado en tiempo de ejecución (punto abierto en `docs/validacion-semantica.md`)
 Cuando un `SI ... ENTONCES` modifica el estado de una tarea, la validación estática (`SEM-2`) deja el estado previsto de esa tarea como desconocido para líneas posteriores. Por eso el ejecutor **revalida en runtime** contra el estado real dentro de la transacción:

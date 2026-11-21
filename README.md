@@ -25,14 +25,13 @@ npm start
 
 Abre [http://localhost:8080](http://localhost:8080). Para ejecutar las pruebas del calendario, usa `npm test`. El proyecto base funciona sin instalar paquetes adicionales.
 
-## Pendientes del equipo
+## Estado de integración
 
-El [borrador de arquitectura y contratos iniciales (LT-1)](arquitectura-semana-1.md) contiene el diagrama de ejecución, catálogo y formato de errores propuestos para revisar con Yareli y el equipo. Aún no están aprobados ni implementados.
+El flujo completo de AutoTask descrito en [arquitectura-semana-1.md](arquitectura-semana-1.md) está integrado en `main`:
 
-- Definir el catálogo y la gramática de comandos para crear tareas, asignarlas, cambiar su estado y notificar, incluidas las instrucciones condicionales.
-- Construir la consola y el lenguaje con lexer, parser, AST, tabla de símbolos y validación semántica.
-- Implementar la representación intermedia, dos optimizaciones y el ejecutor. Integrar las acciones con el tablero, la persistencia, las notificaciones y el historial.
-- Preparar las pruebas del lenguaje, el correo mediante SMTP de pruebas, Docker Compose, la documentación técnica y el tablero Kanban.
+- **Lenguaje y compilador:** lexer (`src/lenguaje.js`), parser/AST (`src/lenguaje/parser.js`), tabla de símbolos (`src/semantica/tabla-simbolos.js`), validación semántica (`src/semantica/validador.js`), generador de IR (`src/ir/generador-ir.js`), optimizador de IR (`src/ir/optimizador.js`) y ejecutor transaccional (`src/ejecutor/ejecutor.js`).
+- **API y servicios:** servidor Node.js (`src/api/servidor.js`, iniciado con `npm start`) con `/api/validar`, `/api/ejecutar`, `/api/tablero` y `/api/salud`, servicios en memoria para ejecución local (`src/ejecutor/servicios-memoria.js`), cliente SMTP para Mailpit (`src/ejecutor/correo-smtp.js`) y soporte opcional para conectar el repositorio PostgreSQL cuando se integre el PR #32 (`src/persistencia/repositorio-postgres.js`, `db/init/`).
+- **Interfaz:** consola de instrucciones (`consola.js`), tablero por estado e historial (`tablero.js`) y calendario de rotaciones (`app.js`, `schedule.js`).
 
 ## Ejecutar con Docker Compose
 

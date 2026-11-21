@@ -114,7 +114,10 @@ export function tokenizar(entrada) {
         continue;
       }
 
-      const esFecha = REGEX_FECHA_ISO.test(contenido);
+      // Una cadena con forma de fecha sigue siendo un título o mensaje válido.
+      // Solo es FECHA cuando sigue al argumento opcional KW_FECHA.
+      const anterior = tokens.at(-1);
+      const esFecha = anterior?.tipo === "KW_FECHA" && REGEX_FECHA_ISO.test(contenido);
       tokens.push({
         tipo: esFecha ? "FECHA" : "CADENA",
         valor: contenido,

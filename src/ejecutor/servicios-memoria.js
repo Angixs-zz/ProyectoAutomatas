@@ -79,6 +79,9 @@ export function crearServiciosEnMemoria({
     cambiarEstado: (...args) => crearRepositorio(datosTareas).cambiarEstado(...args),
     consultarTarea: (...args) => crearRepositorio(datosTareas).consultarTarea(...args),
     listarTareas: (...args) => crearRepositorio(datosTareas).listarTareas(...args),
+    async listarUsuarios() {
+      return datosUsuarios.map((u) => ({ ...u }));
+    },
   };
 
   return {

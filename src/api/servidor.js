@@ -114,6 +114,7 @@ function convertirResultadoAHistorial(resultado, lineasFuente, contador) {
 export function crearAplicacion({
   servicios = crearServiciosEnMemoria(),
   historialInicial = [],
+  historialRepo = null,
   almacenamiento = 'memoria',
   directorioPublico = RAIZ_PROYECTO,
 } = {}) {
@@ -131,13 +132,14 @@ export function crearAplicacion({
       }
 
       if (req.method === 'GET' && ruta === '/api/tablero') {
-        const [tareas, usuarios] = await Promise.all([
+        const [tareas, usuarios, historialActual] = await Promise.all([
           servicios.tareas.listarTareas(),
           servicios.tareas.listarUsuarios(),
+          historialRepo ? historialRepo.listarHistorial({ limite: 100 }) : Promise.resolve(historial),
         ]);
         return enviarJSON(res, 200, {
           tareas: unirResponsables(tareas, usuarios),
-          historial,
+          historial: historialActual,
         });
       }
 
@@ -177,6 +179,19 @@ export function crearAplicacion({
           }
           for (const entrada of nuevasEntradas) {
             historial.unshift(entrada);
+            if (historialRepo && !['crear', 'asignar', 'cambiar_estado'].includes(entrada.operacion)) {
+              await historialRepo.registrarHistorial(entrada);
+            }
+          }
+          if (historialRepo && respuesta.partial && (respuesta.diagnosticos?.length ?? 0) > 0) {
+            const diag = respuesta.diagnosticos[0];
+            await historialRepo.registrarHistorial({
+              tipo: 'operacion',
+              operacion: 'error',
+              instruccion: diag.linea ? (lineas[diag.linea - 1] ?? '').trim() : '',
+              resultado: 'error',
+              detalle: diag.mensaje,
+            });
           }
         }
 
@@ -222,29 +237,41 @@ async function inicializarServiciosDesdeEntorno() {
   const usaSMTP = Boolean(process.env.SMTP_HOST);
 
   if (!usaPostgres && !usaSMTP) {
-    return { servicios: crearServiciosEnMemoria(), almacenamiento: 'memoria' };
+    return { servicios: crearServiciosEnMemoria(), historialRepo: null, almacenamiento: 'memoria' };
   }
 
   const serviciosMemoria = crearServiciosEnMemoria();
   let tareas = serviciosMemoria.tareas;
   let notificaciones = serviciosMemoria.notificaciones;
+  let historialRepo = null;
   let almacenamiento = 'memoria';
 
   if (usaPostgres) {
-    const [{ crearPoolPostgres }, { crearRepositorioPostgres }] = await Promise.all([
+    const [
+      { crearPoolPostgres },
+      { crearRepositorioPostgres },
+      { aplicarMigraciones },
+    ] = await Promise.all([
       import('../persistencia/pool-postgres.js'),
       import('../persistencia/repositorio-postgres.js'),
+      import('../persistencia/migraciones.js'),
     ]);
     const pool = crearPoolPostgres();
+    await aplicarMigraciones(pool);
     const repo = crearRepositorioPostgres(pool);
-    tareas = repo;
-    notificaciones = repo;
+    tareas = {
+      ...repo.tareas,
+      listarUsuarios: repo.listarUsuarios,
+    };
+    notificaciones = repo.notificaciones;
+    historialRepo = repo;
     almacenamiento = 'postgres';
   }
 
   const correo = usaSMTP ? crearServicioCorreoSMTP() : serviciosMemoria.correo;
   return {
     servicios: { tareas, notificaciones, correo },
+    historialRepo,
     almacenamiento,
   };
 }
@@ -252,8 +279,8 @@ async function inicializarServiciosDesdeEntorno() {
 const esEjecucionDirecta = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (esEjecucionDirecta) {
   const puerto = Number(process.env.PORT ?? 8080);
-  const { servicios, almacenamiento } = await inicializarServiciosDesdeEntorno();
-  const servidor = http.createServer(crearAplicacion({ servicios, almacenamiento }));
+  const { servicios, historialRepo, almacenamiento } = await inicializarServiciosDesdeEntorno();
+  const servidor = http.createServer(crearAplicacion({ servicios, historialRepo, almacenamiento }));
   servidor.listen(puerto, () => {
     console.log(`AutoTask escuchando en http://localhost:${puerto} (${almacenamiento})`);
   });

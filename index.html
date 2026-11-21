@@ -16,8 +16,10 @@
   </script>
   <link rel="stylesheet" href="./styles.css?v=20261101-1">
   <link rel="stylesheet" href="./consola.css">
+  <link rel="stylesheet" href="./tablero.css">
   <script type="module" src="./app.js?v=20261101-1"></script>
   <script type="module" src="./consola.js"></script>
+  <script type="module" src="./tablero.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -49,6 +51,26 @@
           <ol class="console-results" id="console-results"></ol>
           <ol class="console-diagnostics" id="console-diagnostics"></ol>
         </div>
+      </div>
+    </section>
+
+    <!-- Tablero de tareas e historial (#8): tareas de AutoTask, separadas del calendario de TareasHogar -->
+    <section class="board-section" id="tablero" aria-labelledby="board-heading">
+      <div class="section-heading"><div><p class="eyebrow">TAREAS DE AUTOTASK</p><h2 id="board-heading">Tablero de tareas</h2></div><button type="button" class="board-refresh" id="board-refresh">Actualizar</button></div>
+      <div class="board-status" id="board-status" role="status" aria-live="polite" data-estado="cargando">Cargando tareas e historial…</div>
+      <div class="board-columns" id="board-columns"></div>
+      <div class="history-heading">
+        <h3 id="history-heading">Historial de operaciones y notificaciones</h3>
+        <div class="history-filters" role="group" aria-label="Filtrar historial">
+          <button type="button" class="history-filter" data-filtro="todo" aria-pressed="true">Todo</button>
+          <button type="button" class="history-filter" data-filtro="operaciones" aria-pressed="false">Operaciones</button>
+          <button type="button" class="history-filter" data-filtro="notificaciones" aria-pressed="false">Notificaciones</button>
+        </div>
+      </div>
+      <ol class="history-list" id="history-list" aria-labelledby="history-heading"></ol>
+      <div class="board-dev">
+        <label><input type="checkbox" id="board-fail"> Simular que la API no responde</label>
+        <label><input type="checkbox" id="board-empty"> Simular que no hay datos</label>
       </div>
     </section>
     <div class="workspace">

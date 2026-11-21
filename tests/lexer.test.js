@@ -69,3 +69,19 @@ test("Reporta CADENA_SIN_CERRAR cuando falta la comilla de cierre antes del salt
   const linea2 = tokens.filter((t) => t.inicio.linea === 2);
   assert.equal(linea2[0].tipo, "KW_LISTAR");
 });
+
+test("Distingue una fecha de títulos, destinatarios y mensajes con el mismo formato", () => {
+  const { tokens, diagnosticos } = tokenizar(
+    'CREAR TAREA "2026-11-15" FECHA "2026-11-20"',
+  );
+
+  assert.deepEqual(diagnosticos, []);
+  const cadenasYFechas = tokens.filter((t) => t.tipo === "CADENA" || t.tipo === "FECHA");
+  assert.deepEqual(
+    cadenasYFechas.map((t) => ({ tipo: t.tipo, valor: t.valor })),
+    [
+      { tipo: "CADENA", valor: "2026-11-15" },
+      { tipo: "FECHA", valor: "2026-11-20" },
+    ],
+  );
+});

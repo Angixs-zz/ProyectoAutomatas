@@ -113,7 +113,21 @@ async function enviar(modo) {
   mostrarEstado('cargando', modo === 'validacion' ? 'Validando el programa…' : 'Ejecutando el programa…');
 
   try {
-    const respuesta = await enviarPrograma(texto, modo, { fallar: casillaFallo.checked });
+    let respuesta;
+    if (casillaFallo.checked) {
+      respuesta = await enviarPrograma(texto, modo, { fallar: true });
+    } else {
+      const ruta = modo === 'validacion' ? '/api/validar' : '/api/ejecutar';
+      const peticion = await fetch(ruta, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ programa: texto }),
+      });
+      if (!peticion.ok) {
+        throw new Error(`La API respondió con estado ${peticion.status}.`);
+      }
+      respuesta = await peticion.json();
+    }
     if (respuesta.ok) {
       pintarResultados(respuesta.resultados);
       mostrarEstado('exito', modo === 'validacion'
@@ -122,6 +136,9 @@ async function enviar(modo) {
     } else {
       pintarDiagnosticos(respuesta.diagnosticos);
       mostrarEstado('error', `Se ${respuesta.diagnosticos.length === 1 ? 'encontró' : 'encontraron'} ${plural(respuesta.diagnosticos.length, 'error', 'errores')}. No se ejecutó ninguna instrucción.`);
+    }
+    if (modo === 'ejecucion') {
+      window.dispatchEvent(new CustomEvent('autotask:programa-ejecutado'));
     }
   } catch (error) {
     mostrarEstado('error', `No se pudo completar la solicitud. ${error.message} Intenta de nuevo.`);

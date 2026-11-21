@@ -34,14 +34,16 @@ services:
         condition: service_started
     environment:
       PORT: 8080
-      DATABASE_URL: ${DATABASE_URL:-postgresql://autotask:autotask_dev@postgres:5432/autotask}
+      # Se deriva de POSTGRES_* para no quedar desincronizada si cambian las credenciales.
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-autotask}:${POSTGRES_PASSWORD:-autotask_dev}@postgres:5432/${POSTGRES_DB:-autotask}}
       PGHOST: postgres
       PGPORT: 5432
       PGUSER: ${POSTGRES_USER:-autotask}
       PGPASSWORD: ${POSTGRES_PASSWORD:-autotask_dev}
       PGDATABASE: ${POSTGRES_DB:-autotask}
       SMTP_HOST: ${SMTP_HOST:-mailpit}
-      SMTP_PORT: ${SMTP_PORT:-1025}
+      # Mailpit escucha en 1025 dentro de la red; SMTP_PORT solo publica en el host.
+      SMTP_PORT: 1025
       SMTP_FROM: ${SMTP_FROM:-autotask@localhost}
     ports:
       - "${APP_PORT:-8080}:8080"

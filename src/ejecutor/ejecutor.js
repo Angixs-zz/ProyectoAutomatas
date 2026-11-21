@@ -85,7 +85,9 @@ async function obtenerTareaExistente(txTareas, refTarea, temporalesTareas, inst)
 function envolverResultado(inst, resultado, temporalesCondiciones) {
   if (!inst.condicional) return resultado;
   const linea = inst.condicional.linea ?? inst.linea ?? null;
-  const condicion = Boolean(temporalesCondiciones.get(inst.condicional.temp));
+  const condicion = typeof inst.condicional.valor === 'boolean'
+    ? inst.condicional.valor
+    : Boolean(temporalesCondiciones.get(inst.condicional.temp));
   return {
     linea,
     operacion: 'condicional',
@@ -312,7 +314,7 @@ export async function ejecutarIR(programaIR, servicios) {
     });
   } catch (error) {
     if (error instanceof ErrorEjecucion) {
-      return fallo(error.codigo, error.mensaje, error.linea, error.columna);
+      return fallo(error.codigo, error.mensaje ?? error.message, error.linea, error.columna);
     }
     return fallo('ERROR_PERSISTENCIA', 'No se pudo completar la operación en el repositorio de tareas.');
   }

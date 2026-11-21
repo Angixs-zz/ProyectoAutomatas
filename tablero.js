@@ -121,7 +121,16 @@ async function cargar() {
   botonActualizar.disabled = true;
   mostrarEstado('cargando', 'Cargando tareas e historial…');
   try {
-    const datos = await cargarTablero({ fallar: casillaFallo.checked, vacio: casillaVacio.checked });
+    let datos;
+    if (casillaFallo.checked || casillaVacio.checked) {
+      datos = await cargarTablero({ fallar: casillaFallo.checked, vacio: casillaVacio.checked });
+    } else {
+      const peticion = await fetch('/api/tablero');
+      if (!peticion.ok) {
+        throw new Error(`La API respondió con estado ${peticion.status}.`);
+      }
+      datos = await peticion.json();
+    }
     historial = datos.historial;
     pintarTablero(datos.tareas);
     pintarHistorial();
@@ -147,6 +156,7 @@ async function cargar() {
 botonActualizar.addEventListener('click', cargar);
 casillaFallo.addEventListener('change', cargar);
 casillaVacio.addEventListener('change', cargar);
+window.addEventListener('autotask:programa-ejecutado', cargar);
 
 for (const boton of botonesFiltro) {
   boton.addEventListener('click', () => {

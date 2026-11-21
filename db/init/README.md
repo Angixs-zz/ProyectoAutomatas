@@ -1,5 +1,5 @@
 # Scripts de inicialización de PostgreSQL
 
-Los archivos `.sql` o `.sh` colocados en esta carpeta se ejecutan automáticamente al crear el volumen de PostgreSQL por primera vez (`/docker-entrypoint-initdb.d`).
+Los scripts numerados `.sql` de esta carpeta se ejecutan en orden al crear el volumen de PostgreSQL por primera vez (`/docker-entrypoint-initdb.d`). `001_esquema.sql` crea el esquema de AutoTask y `002_datos_demo.sql` carga usuarios y tareas de ejemplo de forma idempotente.
 
-Aquí se integrarán las migraciones iniciales y datos de ejemplo definidos en el issue **#5 (BE-1)** cuando estén listos.
+Estos scripts inicializan una base de datos nueva. Si ya existe un volumen, los scripts no se vuelven a ejecutar automáticamente; los cambios futuros del esquema requerirán migraciones explícitas.

@@ -73,12 +73,18 @@ function pintarDiagnosticos(diagnosticos) {
 }
 
 
+// La API devuelve responsableId en CONSULTAR; si no trae el nombre, se muestra el id para no decir "sin asignar" por error (#45).
+function describirResponsable(tarea) {
+  if (tarea.responsable) return tarea.responsable;
+  return tarea.responsableId ? `id ${tarea.responsableId}` : 'sin asignar';
+}
+
 function describir(r) {
   switch (r.operacion) {
     case 'crear': return `Tarea «${r.titulo}» creada (${r.tareaId}) con estado ${r.estado}.`;
     case 'asignar': return `Tarea «${r.titulo}» asignada a ${r.responsable}.`;
     case 'cambiar_estado': return `Tarea «${r.titulo}» cambió a ${r.estado}.`;
-    case 'consultar': return `«${r.tarea.titulo}»: ${r.tarea.estado}, responsable: ${r.tarea.responsable ?? 'sin asignar'}.`;
+    case 'consultar': return `«${r.tarea.titulo}»: ${r.tarea.estado}, responsable: ${describirResponsable(r.tarea)}.`;
     case 'listar': return `${plural(r.tareas.length, 'tarea', 'tareas')}: ${r.tareas.map((t) => `${t.titulo} (${t.estado})`).join(', ')}.`;
     case 'notificar': return r.estado === 'incierto' || r.estado === 'no_procesado'
       ? `Notificación para ${r.destinatario}: ${r.estado === 'incierto' ? 'el registro es incierto' : 'no se procesó'}.`
@@ -117,9 +123,10 @@ async function enviar(modo) {
   botonValidar.disabled = true;
   mostrarEstado('cargando', modo === 'validacion' ? 'Validando el programa…' : 'Ejecutando el programa…');
 
+  const simulado = casillaFallo.checked; // la casilla usa una respuesta simulada, no la API real
   try {
     let respuesta;
-    if (casillaFallo.checked) {
+    if (simulado) {
       respuesta = await enviarPrograma(texto, modo, { fallar: true });
     } else {
       const ruta = modo === 'validacion' ? '/api/validar' : '/api/ejecutar';
@@ -151,7 +158,7 @@ async function enviar(modo) {
       window.dispatchEvent(new CustomEvent('autotask:programa-ejecutado'));
     }
   } catch (error) {
-    mostrarEstado('error', `No se pudo completar la solicitud. ${error.message} Intenta de nuevo.`);
+    mostrarEstado('error', `${simulado ? 'Simulación: ' : ''}No se pudo completar la solicitud. ${error.message} Intenta de nuevo.`);
   } finally {
     enCurso = false;
     botonEjecutar.disabled = false;

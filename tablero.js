@@ -18,6 +18,7 @@ const NOMBRE_TIPO = { operacion: 'Operación', notificacion: 'Notificación', co
 const NOMBRE_OPERACION = {
   crear: 'Crear tarea', asignar: 'Asignar tarea', cambiar_estado: 'Cambiar estado', consultar: 'Consultar tarea',
   listar: 'Listar tareas', notificar: 'Notificar', enviar_correo: 'Enviar correo', condicional: 'Condicional',
+  error: 'Programa rechazado', // la API registra así los programas con errores (#45)
 };
 // incierto y no_procesado vienen de la ejecución parcial del ejecutor (docs/contrato-ir.md, PR #30).
 const NOMBRE_RESULTADO = {
@@ -102,8 +103,8 @@ function pintarHistorial() {
   }));
 }
 
-function mostrarErrorDeCarga(error) {
-  mostrarEstado('error', `No se pudieron cargar las tareas ni el historial. ${error.message} `);
+function mostrarErrorDeCarga(error, prefijo) {
+  mostrarEstado('error', `${prefijo}No se pudieron cargar las tareas ni el historial. ${error.message} `);
   const reintentar = crear('button', 'board-retry', 'Reintentar');
   reintentar.type = 'button';
   reintentar.addEventListener('click', cargar);
@@ -121,9 +122,12 @@ async function cargar() {
   seccion.setAttribute('aria-busy', 'true');
   botonActualizar.disabled = true;
   mostrarEstado('cargando', 'Cargando tareas e historial…');
+  // Con una casilla marcada los datos son simulados: se avisa en el mensaje para no confundirlos con los reales (#45).
+  const simulado = casillaFallo.checked || casillaVacio.checked;
+  const prefijo = simulado ? 'Simulación: ' : '';
   try {
     let datos;
-    if (casillaFallo.checked || casillaVacio.checked) {
+    if (simulado) {
       datos = await cargarTablero({ fallar: casillaFallo.checked, vacio: casillaVacio.checked });
     } else {
       const peticion = await fetch('/api/tablero');
@@ -136,13 +140,13 @@ async function cargar() {
     pintarTablero(datos.tareas);
     pintarHistorial();
     if (datos.tareas.length === 0) {
-      mostrarEstado('vacio', 'Todavía no hay tareas. Puedes crearlas desde la consola con CREAR TAREA "título".');
+      mostrarEstado('vacio', `${prefijo}Todavía no hay tareas. Puedes crearlas desde la consola con CREAR TAREA "título".`);
     } else {
       const hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-      mostrarEstado('listo', `${datos.tareas.length} ${datos.tareas.length === 1 ? 'tarea' : 'tareas'} · actualizado a las ${hora}`);
+      mostrarEstado('listo', `${prefijo}${datos.tareas.length} ${datos.tareas.length === 1 ? 'tarea' : 'tareas'} · actualizado a las ${hora}`);
     }
   } catch (error) {
-    mostrarErrorDeCarga(error);
+    mostrarErrorDeCarga(error, prefijo);
   } finally {
     enCurso = false;
     seccion.removeAttribute('aria-busy');

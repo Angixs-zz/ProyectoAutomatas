@@ -46,6 +46,17 @@ test('listar tareas y usuarios mapea el formato de PostgreSQL al contrato JS', a
   ]);
 });
 
+test('DATE de pg conserva el día calendario al listar y consultar tareas', async () => {
+  const fecha = new Date(2026, 10, 30);
+  const fila = { id: 'task_1', titulo: 'Informe', estado: 'PENDIENTE', responsable_id: null, fecha };
+  const pool = crearPoolFalso(async (sql) => (
+    sql.includes('FROM tareas') ? { rows: [fila] } : { rows: [] }
+  ));
+  const repo = crearRepositorioPostgres(pool);
+  assert.equal((await repo.listarTareas())[0].fecha, '2026-11-30');
+  assert.equal((await repo.tareas.consultarTarea({ tareaId: 'task_1' })).fecha, '2026-11-30');
+});
+
 test('crear tarea usa parámetros y registra creación en la misma transacción', async () => {
   const pool = crearPoolFalso(async (sql) => {
     if (sql.startsWith('INSERT INTO tareas')) {

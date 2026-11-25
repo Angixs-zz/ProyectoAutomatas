@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "test:e2e": "node --test e2e/autotask.e2e.mjs",
+    "test:e2e": "node --test e2e/autotask.e2e.mjs e2e/persistencia-api.e2e.mjs",
     "start": "node src/api/servidor.js"
   },
   "dependencies": {

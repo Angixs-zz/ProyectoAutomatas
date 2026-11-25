@@ -2,7 +2,7 @@
 
 **Entrega:** Proyecto integrador · Lenguajes y Autómatas II  
 **Fecha de verificación integrada:** 2026-11-24
-**Commit base de integración:** `4d7897805e25298612d1d949b4a3ed0361c0ccd9` (`main` tras PR #46–#51); la corrección posterior del optimizador y estas notas requieren el commit final indicado en el historial de `main`.
+**Commit verificado de `main`:** `9c683cf32186dfc3e43d10492229959c1e413636` (PR #46–#52 integrados; suites repetidas después del merge). Cambios posteriores exclusivamente documentales no alteran esta verificación.
 **Alcance:** AutoTask, opción 3 del PDF: automatización de tareas y procesos mediante instrucciones escritas.
 
 > Esta matriz contrasta el PDF del proyecto con el código y las pruebas del repositorio. Un requisito solo se marca **Cumplido** cuando existe código, prueba o documento verificable. Las adaptaciones propias de la opción 3 se marcan como **Cumplido (adaptado)** y se explican; no se presentan como cumplimiento literal de los ejemplos de dispositivos del PDF.

@@ -826,7 +826,7 @@ curl -s http://localhost:8025/api/v1/messages
 | Comprobación | Comando / archivo | Resultado |
 | --- | --- | --- |
 | Pruebas unitarias y de integración | `npm test` | 117/117 pruebas aprobadas antes de este cambio. |
-| Suite E2E con Docker (captura histórica anterior a #46–#51) | `DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` | 5/5 en aquella captura; ver matriz para 8/8 de integración. |
+| Suite E2E con Docker (captura histórica anterior a #46–#52) | `DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` | 5/5 en aquella captura; ver matriz para 8/8 de integración. |
 | Web y API disponibles | `curl http://localhost:8080/api/salud` | `{"ok":true,"almacenamiento":"postgres"}` |
 | Validar no escribe | `tests/servidor.test.js` | Estado de servicios idéntico antes/después de validar. |
 | Errores por etapa | `tests/servidor.test.js` | Cobertura léxica, sintáctica, semántica y de ejecución. |

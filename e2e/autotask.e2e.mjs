@@ -91,6 +91,7 @@ test('E2E Docker: flujo completo de comandos, condicionales, tablero, historial 
   assert.ok(tarea, 'La tarea creada debe aparecer en /api/tablero');
   assert.equal(tarea.estado, 'EN_PROGRESO');
   assert.equal(tarea.responsable, 'Yareli');
+  assert.equal(tarea.fecha, '2026-11-30', 'DATE de PostgreSQL conserva año, mes y día');
 
   assert.ok(tablero.historial.some((h) => h.operacion === 'consultar'));
   assert.ok(tablero.historial.some((h) => h.operacion === 'listar'));
@@ -237,6 +238,7 @@ test('E2E Docker: el estado de tareas e historial persisten tras reiniciar app y
   assert.ok(tarea, 'La tarea debe seguir existiendo en PostgreSQL tras reiniciar los contenedores');
   assert.equal(tarea.estado, 'EN_PROGRESO');
   assert.equal(tarea.responsable, 'Diego');
+  assert.equal(tarea.fecha, '2026-11-30');
   assert.ok(
     tablero.historial.some((h) => h.operacion === 'crear' && h.detalle?.includes(titulo)),
     'El historial de creación debe conservarse tras reiniciar',

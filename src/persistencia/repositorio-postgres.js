@@ -61,12 +61,17 @@ function historialDesdeFila(fila) {
 
 function tareaDesdeFila(fila) {
   if (!fila) return null;
+  // pg interpreta DATE como medianoche local. Usar ISO UTC puede desplazar el día
+  // en zonas horarias positivas; String(Date) no produce una fecha ISO.
+  const fecha = fila.fecha instanceof Date
+    ? `${fila.fecha.getFullYear()}-${String(fila.fecha.getMonth() + 1).padStart(2, '0')}-${String(fila.fecha.getDate()).padStart(2, '0')}`
+    : fila.fecha == null ? null : String(fila.fecha).slice(0, 10);
   return {
     id: fila.id,
     titulo: fila.titulo,
     estado: fila.estado,
     responsableId: fila.responsable_id ?? null,
-    fecha: fila.fecha == null ? null : String(fila.fecha).slice(0, 10),
+    fecha,
   };
 }
 

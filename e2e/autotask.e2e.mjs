@@ -150,6 +150,7 @@ test('E2E: compara ejecución de IR sin optimizar y optimizada preservando efect
   const codigo = [
     'CREAR TAREA "Comparar IR"',
     'SI TAREA "Comparar IR" ESTA PENDIENTE ENTONCES CAMBIAR ESTADO TAREA "Comparar IR" A EN_PROGRESO',
+    'SI TAREA "Comparar IR" ESTA COMPLETADA ENTONCES NOTIFICAR A "Yareli" MENSAJE "No ejecutar"',
     'CAMBIAR ESTADO TAREA "Comparar IR" A COMPLETADA',
     'CONSULTAR TAREA "Comparar IR"',
   ].join('\n');
@@ -169,9 +170,10 @@ test('E2E: compara ejecución de IR sin optimizar y optimizada preservando efect
   const sinOpt = await correr(false);
   const conOpt = await correr(true);
 
-  assert.ok(conOpt.irFinal.metadatos.optimizacionesAplicadas.length >= 1);
+  assert.ok(conOpt.irFinal.metadatos.optimizacionesAplicadas.includes('simplificacion_condiciones_constantes'));
+  assert.ok(conOpt.irFinal.metadatos.optimizacionesAplicadas.includes('eliminacion_codigo_inalcanzable'));
   assert.deepEqual(conOpt.ejecucion.resultados, sinOpt.ejecucion.resultados);
-  assert.deepEqual(conOpt.estado.tareas, sinOpt.estado.tareas);
+  assert.deepEqual(conOpt.estado, sinOpt.estado);
 });
 
 test('E2E PostgreSQL: manejo seguro de error parcial post-commit sin reintentos', async () => {

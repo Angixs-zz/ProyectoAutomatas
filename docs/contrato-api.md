@@ -207,8 +207,7 @@ Nombres implementados:
 | Nombre | Regla |
 | --- | --- |
 | `simplificacion_condiciones_constantes` | Sustituye una condición cuyo resultado ya se conoce por la acción directa. |
-| `eliminacion_codigo_inalcanzable` | Elimina un bloque `SI` cuya condición ya se sabe falsa. |
-| `eliminacion_cambios_estado_redundantes` | Elimina un cambio de estado intermedio sobrescrito en un bloque lineal sin lecturas ni efectos intermedios. |
+| `eliminacion_codigo_inalcanzable` | Elimina la acción de un `SI` conocido falso; conserva el resultado del condicional. Los cambios de estado intermedios no se eliminan porque generan historial y resultados. |
 
 ### Garantía de solo lectura
 
@@ -827,7 +826,7 @@ curl -s http://localhost:8025/api/v1/messages
 | Comprobación | Comando / archivo | Resultado |
 | --- | --- | --- |
 | Pruebas unitarias y de integración | `npm test` | 117/117 pruebas aprobadas antes de este cambio. |
-| Suite E2E con Docker | `DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` | 5/5 pruebas aprobadas. |
+| Suite E2E con Docker (captura histórica anterior a #46–#51) | `DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` | 5/5 en aquella captura; ver matriz para 8/8 de integración. |
 | Web y API disponibles | `curl http://localhost:8080/api/salud` | `{"ok":true,"almacenamiento":"postgres"}` |
 | Validar no escribe | `tests/servidor.test.js` | Estado de servicios idéntico antes/después de validar. |
 | Errores por etapa | `tests/servidor.test.js` | Cobertura léxica, sintáctica, semántica y de ejecución. |

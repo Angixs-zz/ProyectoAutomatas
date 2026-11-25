@@ -1,9 +1,8 @@
 # Matriz de requisitos y evidencias · AutoTask
 
 **Entrega:** Proyecto integrador · Lenguajes y Autómatas II  
-**Fecha de verificación:** 2026-11-20  
-**Rama de entrega:** `docs/entrega-final` (integrada a `main` mediante PR)  
-**Commit base verificado:** `7e4c742` (`main` después de los PR #36, #37 y #38)  
+**Fecha de verificación integrada:** 2026-11-24
+**Commit base de integración:** `4d7897805e25298612d1d949b4a3ed0361c0ccd9` (`main` tras PR #46–#51); la corrección posterior del optimizador y estas notas requieren el commit final indicado en el historial de `main`.
 **Alcance:** AutoTask, opción 3 del PDF: automatización de tareas y procesos mediante instrucciones escritas.
 
 > Esta matriz contrasta el PDF del proyecto con el código y las pruebas del repositorio. Un requisito solo se marca **Cumplido** cuando existe código, prueba o documento verificable. Las adaptaciones propias de la opción 3 se marcan como **Cumplido (adaptado)** y se explican; no se presentan como cumplimiento literal de los ejemplos de dispositivos del PDF.
@@ -12,11 +11,11 @@
 
 | Comprobación | Resultado | Evidencia |
 | --- | --- | --- |
-| Pruebas unitarias y de integración en memoria | **120/120** | `npm test` |
-| Pruebas E2E contra Docker Compose | **5/5** | `DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` |
-| Arranque limpio con Docker Compose | Verificado | Proyecto aislado `autotask_verify`; `/api/salud` respondió `almacenamiento: "postgres"` |
-| Persistencia tras reinicio de contenedores | Verificada | Tarea `Persistencia 1795230072` (`task_7`) conservada después de `docker compose stop`/`start` sin `-v` |
-| Correo visible en Mailpit | Verificado | `GET http://localhost:8025/api/v1/messages`; prueba E2E de correo y `docs/contrato-api.md` §9.10 |
+| Pruebas unitarias y de integración en memoria | **123/123** | `npm test` |
+| Pruebas E2E contra Docker Compose | **8/8** | `POSTGRES_PORT=55432 DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` |
+| Arranque limpio con Docker Compose | **No repetido en esta verificación** | `docker compose up -d --build` sobre el volumen existente: primera invocación falló por puerto 5432 ocupado; `POSTGRES_PORT=55432 docker compose up -d --build` arrancó. La captura anterior de arranque aislado está en `docs/evidencias/03-docker-estado.txt`. |
+| Persistencia tras reinicio de contenedores | Verificada | E2E 6: tarea con fecha, responsable e historial conservados tras `docker compose restart app postgres`, sin borrar volúmenes. |
+| Correo visible en Mailpit | Verificado | E2E 2 consulta `/api/v1/messages` por destinatario único; captura de Melody en #45 (commit anterior). |
 | Documentación técnica | Completa para los módulos implementados | `docs/` y este índice |
 
 ## 2. Requisitos mínimos del PDF (§15)
@@ -26,7 +25,7 @@
 | Aplicación web | **Cumplido** | `index.html`, `consola.js`, `tablero.js`, `src/api/servidor.js`; E2E 1 | Interfaz servida por el mismo servicio `app`. |
 | Consola de instrucciones | **Cumplido** | `index.html`, `consola.js`; `tests/consola-ejemplos.test.js` | Validar y ejecutar contra la API real. |
 | Panel visual de dispositivos | **Cumplido (adaptado)** | Tablero de tareas por estado e historial: `tablero.js`; `tests/tablero-ejemplos.test.js`, E2E 2 | En la opción 3 el panel visual es el tablero de tareas, no LEDs físicos. |
-| Mínimo 3 dispositivos simulados | **Cumplido (adaptado)** | Datos demo con 4 tareas y 3 usuarios (`db/init/002_datos_demo.sql`); tablero con 4 columnas | La opción 3 sustituye dispositivos por tareas y usuarios simulados. No se alega cumplimiento literal de “3 LEDs”. |
+| Mínimo 3 dispositivos simulados | **Adaptado; aceptación pendiente** | Datos demo con **3 tareas y 6 usuarios** (`db/init/002_datos_demo.sql`); tablero con 4 columnas | La opción 3 sustituye dispositivos por tareas y usuarios. No se alega cumplimiento literal de “3 LEDs”. |
 | Comandos `ENCENDER` y `APAGAR` | **No aplica literalmente** | Equivalentes AutoTask: `CREAR TAREA`, `CAMBIAR ESTADO ... A EN_PROGRESO/COMPLETADA` | El PDF permite elegir la opción 3; su catálogo propio usa tareas. Ver §4. |
 | Comandos `ACTIVAR` y `DESACTIVAR` | **No aplica literalmente** | Equivalentes: transiciones de estado y `CANCELAR` mediante `CAMBIAR ESTADO ... A CANCELADA` | No existen alarmas en AutoTask. |
 | Comando `CONSULTAR` | **Cumplido (adaptado)** | `CONSULTAR TAREA "t"`; `tests/parser.test.js`, `tests/ejecutor.test.js` | Devuelve estado y responsable de la tarea. |
@@ -38,10 +37,10 @@
 | Tabla de símbolos | **Cumplido** | `src/semantica/tabla-simbolos.js`; `tests/tabla-simbolos.test.js` | Resuelve tareas/usuarios y detecta ambigüedad. |
 | Validación semántica | **Cumplido** | `src/semantica/validador.js`; `tests/validador.test.js` | Referencias, fechas, estados y transiciones. |
 | Generación de IR | **Cumplido** | `src/ir/generador-ir.js`; `tests/generador-ir.test.js`; `docs/contrato-ir.md` | IR de solo datos, serializable. |
-| Dos optimizaciones | **Cumplido** | `src/ir/optimizador.js`; `tests/optimizador.test.js`; E2E 4 | (1) condiciones constantes/código inalcanzable; (2) eliminación de cambios de estado redundantes. |
+| Dos optimizaciones | **Cumplido con alcance limitado** | `src/ir/optimizador.js`; `tests/optimizador.test.js`; E2E 4 | (1) simplificación de `SI` conocido verdadero; (2) eliminación de la acción de un `SI` conocido falso. No se elimina una transición de estado observable. |
 | Motor de ejecución | **Cumplido** | `src/ejecutor/ejecutor.js`; `tests/ejecutor.test.js` | Transacción, revalidación y despachos posteriores al `COMMIT`. |
 | Persistencia | **Cumplido** | `db/init/001_esquema.sql`, `src/persistencia/repositorio-postgres.js`; `tests/repositorio-postgres.test.js`; `docs/persistencia.md` | PostgreSQL 16; respaldo en memoria solo para pruebas. |
-| Pruebas automatizadas | **Cumplido** | `npm test` (120) y `npm run test:e2e` (5) | Ver §1. |
+| Pruebas automatizadas | **Cumplido** | `npm test` (123) y `npm run test:e2e` (8) | Ver §1. |
 | Git y Kanban | **Parcial** | Ramas, PR #21–#38, issues #1–#20 y tablero de GitHub Projects | El tablero existe, pero el token disponible no permite leerlo/actualizarlo; falta evidencia visual del estado final. Ver §7. |
 | Docker Compose | **Cumplido** | `Dockerfile`, `docker-compose.yml`, `.env.example`; E2E 1–5 | `docker compose up --build`. |
 | Envío de correo por SMTP de pruebas | **Cumplido** | `src/ejecutor/correo-smtp.js`; Mailpit; `tests/correo-smtp.test.js`, E2E 2 | Sin cuentas reales. |
@@ -59,10 +58,10 @@
 | Tabla de símbolos con tipo, estado y operaciones | **Cumplido (adaptado)** | Tareas/usuarios en lugar de LEDs/alarmas; `src/semantica/tabla-simbolos.js`; `docs/tabla-simbolos.md` |
 | Acciones semánticas y construcción de la instrucción | **Cumplido** | AST con referencias resueltas en `src/semantica/validador.js`; `docs/validacion-semantica.md` |
 | IR mínima (`GET_STATE`, `SET_STATE`, `COMPARE`, `JUMP_IF_FALSE`, `NOTIFY`, `SEND_EMAIL`, `HALT`) | **Cumplido (adaptado)** | Catálogo equivalente: `CREAR_TAREA`, `ASIGNAR_TAREA`, `CAMBIAR_ESTADO`, `CONSULTAR_TAREA`, `LISTAR_TAREAS`, `NOTIFICAR`, `ENVIAR_CORREO`, `EVALUAR_ESTADO`, `SALTAR_SI_FALSO`, `ETIQUETA`; `docs/contrato-ir.md` §2.2 |
-| Optimización 1: instrucciones redundantes | **Cumplido** | Eliminación de cambios de estado redundantes; `tests/optimizador.test.js` |
-| Optimización 2: asignaciones sobrescritas / condiciones constantes | **Cumplido** | Simplificación de condiciones constantes y eliminación de código inalcanzable; E2E 4. La eliminación de “dead stores” cubre el caso de asignaciones sobrescritas en bloques lineales. |
-| Justificación de conservación de comportamiento | **Cumplido** | `src/ir/optimizador.js` respeta barreras observables (`CONSULTAR`, `LISTAR`, `NOTIFICAR`, `ENVIAR_CORREO`, condicionales); prueba “no elimina cambios de estado si hay una consulta observable intermedia”. |
-| No eliminar/reordenar efectos externos | **Cumplido** | `OPS_BARRERA_BLOQUE` y pruebas del optimizador; E2E 4 |
+| Optimización 1: instrucciones redundantes | **Adaptado** | Simplificación del control de un `SI` conocido verdadero; no borra efectos observables. |
+| Optimización 2: asignaciones sobrescritas / condiciones constantes | **Adaptado** | Elimina la acción inalcanzable bajo un `SI` conocido falso; conserva la traza del condicional. El ejemplo literal de «dead stores» **no** se aplica: las transiciones generan historial y resultados observables. |
+| Justificación de conservación de comportamiento | **Cumplido en los casos probados** | `src/ir/optimizador.js` preserva resultados del `SI` falso y transiciones de estado; prueba de equivalencia de resultados/estado y E2E 4. |
+| No eliminar/reordenar efectos externos | **Cumplido en casos probados** | Optimizaciones limitadas a `SI`; pruebas con notificación/correo intermedios y E2E 4. |
 | Máquina virtual / ejecutor | **Cumplido (adaptado)** | `src/ejecutor/ejecutor.js` interpreta IR; no hay procesador físico. |
 | Actualizar estado y notificar a la interfaz | **Cumplido** | Repositorio + evento `autotask:programa-ejecutado` + recarga del tablero |
 
@@ -81,7 +80,7 @@
 ### Adaptaciones que no deben presentarse como cumplimiento literal
 
 1. **Dispositivos, LEDs y alarmas:** AutoTask es la opción 3. El panel visual es un tablero de tareas y los comandos son operaciones sobre tareas/usuarios. No existen `ENCENDER led1`, `APAGAR led2`, `ACTIVAR alarma1` ni `DESACTIVAR alarma1`.
-2. **Tres dispositivos simulados:** se sustituyen por tres usuarios y cuatro tareas demo. El requisito de “mínimo 3” se mantiene en cantidad de entidades simuladas, pero no en la forma literal de dispositivos.
+2. **Tres dispositivos simulados:** se sustituyen por seis usuarios y tres tareas demo. Esto **no cumple literalmente** el mínimo de tres dispositivos; la aceptación de la adaptación de la opción 3 por la profesora sigue sin demostrarse.
 3. **`REPETIR`:** el PDF la marca como no obligatoria; no se implementó.
 4. **Frontend/backend separados:** el PDF recomienda servicios separados; la entrega usa un solo servicio `app` que sirve frontend y API, más PostgreSQL y Mailpit. Es una decisión justificada, no una omisión.
 
@@ -132,11 +131,11 @@ Las entradas del PDF usan LEDs y alarmas. Se muestran sus equivalentes AutoTask 
 Estos puntos no se marcan como cumplidos porque requieren una acción humana o un permiso que el repositorio no puede demostrar por sí solo:
 
 1. **Tablero Kanban (#19):** el token de `gh` disponible tiene alcances `gist`, `read:org`, `repo` y `workflow`; no incluye `read:project`/`project`. Por eso no se pudo leer ni actualizar `https://github.com/users/Angixs-zz/projects/4/views/1`. Se necesita autorizar un token con alcance de Projects y mover las tarjetas a “Hecho”, o adjuntar capturas del tablero.
-2. **Revisiones de código:** no hay aprobaciones formales registradas (`reviewDecision` vacío). Los PR fueron fusionados, pero “revisiones de código” debe presentarse como **parcial** hasta que existan aprobaciones o capturas de revisión.
-3. **Demostración final (#20):** el guion está listo, pero falta ejecutarlo frente al grupo y guardar capturas de: consola, errores de las tres etapas, tablero, historial, Mailpit y comparación de optimizaciones.
-4. **Evidencias visuales:** no se almacenan capturas en el repositorio. Deben agregarse a la entrega o al issue #20.
+2. **Revisiones de código:** `gh pr review --approve` devolvió HTTP 401 (`Requires authentication`); mediante la API REST sí se registraron revisiones auténticas tipo **COMMENTED** para [#46](https://github.com/Angixs-zz/ProyectoAutomatas/pull/46#pullrequestreview-6050684552), [#47](https://github.com/Angixs-zz/ProyectoAutomatas/pull/47#pullrequestreview-6050686803), [#48](https://github.com/Angixs-zz/ProyectoAutomatas/pull/48#pullrequestreview-6050687082), [#49](https://github.com/Angixs-zz/ProyectoAutomatas/pull/49#pullrequestreview-6050687324) y [#50](https://github.com/Angixs-zz/ProyectoAutomatas/pull/50#pullrequestreview-6050687559). **No son aprobaciones**; #51 y el PR propio de cierre no pueden revisarse como autor. Para aprobaciones formales se necesita revisión de otra cuenta.
+3. **Demostración final (#20):** el guion está preparado y la suite comprobó el flujo HTTP, pero falta ejecutarlo ante la profesora. Pendientes visuales precisos en [guion-demostracion.md](guion-demostracion.md) §3.
+4. **Evidencias visuales:** [Melody sí adjuntó capturas reales en #45](https://github.com/Angixs-zz/ProyectoAutomatas/issues/45#issuecomment-7091763705), tomadas en `76de0b3`: validar, ejecutar, tablero, historial, SI, Mailpit, error semántico, simulación, móvil y modo claro. No demuestran visualmente el estado tras #50/#51 ni el optimizador corregido.
 5. **Asignaciones del tablero:** no se modificaron responsables ni se cerraron #19/#20 porque sus criterios dependen de los puntos anteriores.
 
 ## 8. Conclusión
 
-El producto implementa el lenguaje formal, el pipeline completo, dos optimizaciones, ejecución transaccional, persistencia PostgreSQL, SMTP de pruebas, Docker Compose y pruebas automatizadas. La adaptación a la opción 3 está justificada en el PDF. Los únicos incumplimientos literales son los comandos de dispositivos y `REPETIR`, que no aplican a AutoTask o son opcionales. Quedan pendientes de evidencia manual el tablero Kanban, las revisiones formales y la demostración.
+El producto implementa el lenguaje formal, el pipeline completo, dos técnicas seguras sobre condicionales, ejecución transaccional, persistencia PostgreSQL, SMTP de pruebas, Docker Compose y pruebas automatizadas. La opción 3 del PDF justifica usar tareas, pero **no se ha demostrado aceptación explícita de la profesora de los sustitutos de LEDs/alarmas**. `REPETIR` no es obligatorio. Quedan pendientes el Kanban, aprobaciones formales y la demostración presencial.

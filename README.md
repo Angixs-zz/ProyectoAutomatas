@@ -93,4 +93,4 @@ DATABASE_URL=postgresql://autotask:autotask_dev@localhost:5432/autotask npm run 
 - Abre [http://localhost:8025](http://localhost:8025) en el navegador después de ejecutar un comando `ENVIAR CORREO A "..." MENSAJE "..."` desde la consola web ([http://localhost:8080](http://localhost:8080)) o tras correr `npm run test:e2e`.
 - También puedes consultar la bandeja vía API: `curl http://localhost:8025/api/v1/messages`.
 
-Verificación tras los PR #46–#51: `npm test` **123/123** y `npm run test:e2e` **8/8** con PostgreSQL y Mailpit (PostgreSQL en puerto 55432); detalles en [la matriz](docs/matriz-requisitos.md). Los ejemplos `ENCENDER`/`APAGAR`/`ACTIVAR`/`DESACTIVAR` del PDF **no son comandos literales** de AutoTask. `REPETIR` no es obligatorio.
+Verificación de `main` (`9c683cf`, tras los PR #46–#52): `npm test` **123/123** y `npm run test:e2e` **8/8** con PostgreSQL y Mailpit (PostgreSQL en puerto 55432); detalles en [la matriz](docs/matriz-requisitos.md). Los ejemplos `ENCENDER`/`APAGAR`/`ACTIVAR`/`DESACTIVAR` del PDF **no son comandos literales** de AutoTask. `REPETIR` no es obligatorio.

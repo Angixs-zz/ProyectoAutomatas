@@ -9,7 +9,7 @@ Las evidencias 01–04 corresponden al commit `3b96a25` de `main`. La evidencia 
 | [03-docker-estado.txt](03-docker-estado.txt) | Salida de `docker compose ps` y `GET /api/salud` (`almacenamiento: "postgres"`). |
 | [04-pipeline-y-mailpit.json](04-pipeline-y-mailpit.json) | Respuestas reales de `/api/validar` (con optimización), errores `lexica`, `sintactica`, `semantica` y `ejecucion`, y resumen de mensajes recibidos en Mailpit. |
 | [05-be-6-smtp.md](05-be-6-smtp.md) | Verificación de Mailpit local, significado de estados parciales y límites del escenario SMTP fallido (#42). |
-| [06-integracion-2026-11-24.md](06-integracion-2026-11-24.md) | Comandos y resultados de integración tras #46–#51 y sobre la corrección posterior del optimizador; límites explícitos. |
+| [06-integracion-2026-11-24.md](06-integracion-2026-11-24.md) | Comandos y resultados de integración en `9c683cf` tras #46–#52; límites explícitos. |
 
 ## Capturas de interfaz existentes y pendientes
 

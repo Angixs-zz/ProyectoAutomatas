@@ -1,12 +1,12 @@
 # Verificación integrada · 2026-11-24
 
-Base: `main` en `4d7897805e25298612d1d949b4a3ed0361c0ccd9` (#46–#51); se volvieron a ejecutar ambas suites sobre la rama de corrección del optimizador/documentación, antes del PR de cierre. Para identificar el commit final integrado, consultar la matriz y el historial de `main`; esta nota no pretende que las capturas antiguas representen ese commit.
+Base: `main` en `9c683cf32186dfc3e43d10492229959c1e413636` (#46–#52 integrados). Se repitieron `docker compose up -d --build`, `npm test` y E2E **después del merge** de #52. Las capturas antiguas no representan este commit.
 
 ## Comandos ejecutados y resultados observados
 
 | Comando | Resultado |
 | --- | --- |
-| `npm test` | **123 pruebas, 123 aprobadas, 0 fallidas**; repetido tras retirar la eliminación insegura de transiciones. |
+| `npm test` | **123 pruebas, 123 aprobadas, 0 fallidas**; repetido en `main` tras retirar la eliminación insegura de transiciones. |
 | `docker compose up -d --build` | **Falló** al publicar `localhost:5432`: puerto ocupado; no se borraron datos. |
 | `POSTGRES_PORT=55432 docker compose up -d --build` | App reconstruida; `postgres` healthy, `mailpit` healthy. Contenedores sobre el volumen preexistente, **no** arranque limpio. |
 | `curl -fsS http://localhost:8080/api/salud` | `{"ok":true,"almacenamiento":"postgres"}`. |

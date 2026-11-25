@@ -50,11 +50,16 @@ test('elimina código inalcanzable cuando la condición es siempre falsa', async
   const opt = optimizarIR(ir);
 
   assert.ok(opt.metadatos.optimizacionesAplicadas.includes('eliminacion_codigo_inalcanzable'));
-  assert.equal(opt.instrucciones.length, 1);
+  assert.equal(opt.instrucciones.length, 4);
   assert.equal(opt.instrucciones[0].op, 'CREAR_TAREA');
+  assert.equal(opt.instrucciones.some((i) => i.op === 'NOTIFICAR'), false);
+  const original = crearServiciosEnMemoria();
+  const optimizado = crearServiciosEnMemoria();
+  assert.deepEqual(await ejecutarIR(opt, optimizado), await ejecutarIR(ir, original));
+  assert.deepEqual(optimizado.obtenerEstado(), original.obtenerEstado());
 });
 
-test('elimina cambios de estado redundantes en un bloque lineal sin ocultar errores', async () => {
+test('conserva cambios de estado intermedios: resultados e historial son observables', async () => {
   const ir = await compilar([
     'CREAR TAREA "Flujo"',
     'CAMBIAR ESTADO TAREA "Flujo" A EN_PROGRESO',
@@ -63,16 +68,19 @@ test('elimina cambios de estado redundantes en un bloque lineal sin ocultar erro
 
   const opt = optimizarIR(ir);
 
-  assert.ok(opt.metadatos.optimizacionesAplicadas.includes('eliminacion_cambios_estado_redundantes'));
+  assert.equal(opt.metadatos.optimizacionesAplicadas.includes('eliminacion_cambios_estado_redundantes'), false);
   assert.deepEqual(
     opt.instrucciones.map((i) => i.op),
-    ['CREAR_TAREA', 'CAMBIAR_ESTADO'],
+    ['CREAR_TAREA', 'CAMBIAR_ESTADO', 'CAMBIAR_ESTADO'],
   );
-  assert.equal(opt.instrucciones[1].estado, 'COMPLETADA');
-
-  const res = await ejecutarIR(opt, crearServiciosEnMemoria());
-  assert.equal(res.ok, true);
-  assert.equal(res.resultados[1].estado, 'COMPLETADA');
+  const original = crearServiciosEnMemoria();
+  const optimizado = crearServiciosEnMemoria();
+  const res = await ejecutarIR(ir, original);
+  const resOpt = await ejecutarIR(opt, optimizado);
+  assert.deepEqual(resOpt, res);
+  assert.deepEqual(optimizado.obtenerEstado(), original.obtenerEstado());
+  assert.equal(resOpt.resultados[1].estado, 'EN_PROGRESO');
+  assert.equal(resOpt.resultados[2].estado, 'COMPLETADA');
 });
 
 test('no elimina cambios de estado si hay una consulta observable intermedia', async () => {

@@ -114,13 +114,7 @@ Para reiniciar conservando el volumen:
 docker compose start
 ```
 
-Para borrar también la base de datos (acción destructiva, solo si se desea reiniciar desde cero):
-
-```sh
-docker compose down -v
-```
-
-> **No se debe ejecutar `docker compose down -v` sobre una base con datos que se quieran conservar.** La verificación de persistencia de la entrega se hizo con `stop`/`start`, sin `-v`.
+> **No borres los volúmenes de una instalación existente.** La prueba automatizada reinicia `app` y `postgres` conservando datos.
 
 ### 2.3 Instalación local sin Docker
 
@@ -316,10 +310,10 @@ Cada instrucción incluye operación, argumentos y ubicación. Las tareas creada
 
 ### Optimizaciones implementadas
 
-1. **Simplificación de condiciones constantes y eliminación de código inalcanzable.** Si el estado de una tarea se conoce en tiempo de compilación (por ejemplo, se acaba de crear y está `PENDIENTE`), una condición que siempre es verdadera se ejecuta directamente y una que siempre es falsa se elimina.
-2. **Eliminación de cambios de estado redundantes (dead store).** En un bloque lineal sin lecturas observables, un `CAMBIAR_ESTADO` sobrescrito por otro posterior se elimina.
+1. **Simplificación de condiciones constantes verdaderas.** Si el estado se conoce con certeza, la acción se ejecuta directamente conservando el resultado del condicional.
+2. **Eliminación de acciones inalcanzables.** Ante un `SI` conocido falso se quita la acción, pero se conserva su resultado `condicion: false`.
 
-Ambas conservan el comportamiento porque el optimizador trata como **barreras** las operaciones observables: `CONSULTAR_TAREA`, `LISTAR_TAREAS`, `NOTIFICAR`, `ENVIAR_CORREO`, etiquetas, saltos y condicionales. Las operaciones con efectos externos no se eliminan ni se reordenan. Las pruebas `tests/optimizador.test.js` y el E2E 4 comparan IR sin optimizar vs. optimizada y verifican los mismos efectos.
+Ambas conservan los resultados y efectos en los casos probados: no se eliminan cambios de estado sobrescritos porque su historial y sus resultados intermedios son observables. Las pruebas `tests/optimizador.test.js` y el E2E 4 comparan IR sin optimizar vs. optimizada, incluso el condicional falso.
 
 ---
 
@@ -436,10 +430,10 @@ npm run test:e2e
 
 | Suite | Resultado | Qué cubre |
 | --- | --- | --- |
-| `npm test` | **120/120** | Lexer, parser, AST, símbolos, semántica, IR, optimizador, ejecutor, API, persistencia, SMTP, consola, tablero y calendario |
-| `npm run test:e2e` | **5/5** | Web + PostgreSQL + Mailpit, flujo completo, errores por etapa, rollback real, optimizaciones y `partial` |
+| `npm test` | **123/123** | Pipeline, API, persistencia, SMTP, interfaz, calendario y regresión DATE |
+| `npm run test:e2e` | **8/8** | Web, PostgreSQL, Mailpit, flujo, errores, rollback, optimizaciones, no escritura, `partial` y reinicio |
 
-La suite E2E crea datos con marca de tiempo; no borra los datos demo. La verificación de persistencia se hizo creando una tarea, deteniendo y arrancando el proyecto aislado sin `-v`, y confirmando que la tarea seguía en `/api/tablero`.
+La suite E2E crea datos con marca de tiempo y no borra los datos demo. Reinicia los contenedores sin borrar volúmenes y comprueba tarea e historial; los archivos E2E se ejecutan en serie. En la verificación integrada se usó `POSTGRES_PORT=55432 DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e`. La fecha `DATE` se comprueba contra PostgreSQL real antes y después del reinicio (PR #51).
 
 ### Limitaciones declaradas
 
@@ -458,7 +452,6 @@ La suite E2E crea datos con marca de tiempo; no borra los datos demo. La verific
 | `/api/salud` devuelve `memoria` en Docker | `DATABASE_URL` o `PGHOST` no llegó al contenedor | Revisa `.env` y `docker compose config`. |
 | La app no conecta a PostgreSQL | Contenedor aún iniciando o puerto ocupado | `docker compose ps`; espera el healthcheck; cambia `POSTGRES_PORT`. |
 | No aparecen correos en Mailpit | `SMTP_HOST` no configurado o Mailpit no inició | Revisa `/api/salud` y `docker compose logs mailpit`. |
-| `docker compose down -v` borró datos | Se usó `-v` | Es destructivo por diseño; recrea los datos demo con `docker compose up`. |
 | E2E falla por conexión | Puertos o `DATABASE_URL` no coinciden | Usa `AUTOTASK_URL`, `MAILPIT_URL` y `DATABASE_URL` correctos. |
 
 ---

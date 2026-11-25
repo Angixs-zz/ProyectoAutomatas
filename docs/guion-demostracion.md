@@ -19,10 +19,10 @@ Ejecutar al menos 30 minutos antes:
 - [ ] Abrir <http://localhost:8080> y confirmar que se ven consola, tablero y calendario.
 - [ ] Abrir <http://localhost:8025> y confirmar que Mailpit responde.
 - [ ] Confirmar que el tablero muestra al menos `Preparar informe`, `Revisar gramática` y `Configurar Docker`.
-- [ ] Ejecutar `npm test` → **120/120**.
-- [ ] Ejecutar `DATABASE_URL=postgresql://autotask:autotask_dev@localhost:5432/autotask npm run test:e2e` → **5/5** (si los puertos son los de `.env`).
+- [ ] Ejecutar `npm test` → **123/123** en la verificación integrada.
+- [ ] Ejecutar `POSTGRES_PORT=55432 DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e` → **8/8** en el entorno verificado (adaptar puertos).
 - [ ] Tener una pestaña con el repositorio y otra con el tablero de GitHub Projects.
-- [ ] Limpiar la bandeja de Mailpit con el botón de la interfaz o `curl -X DELETE http://localhost:8025/api/v1/messages`.
+- [ ] Usar un destinatario único para la demo; no vaciar la bandeja existente.
 - [ ] Tener preparadas las capturas de respaldo por si falla la red o Docker.
 
 > Si usas puertos alternativos, ajusta `APP_PORT`, `POSTGRES_PORT`, `SMTP_PORT` y `MAILPIT_UI_PORT` en `.env`, y usa la URL correspondiente en la demo.
@@ -57,7 +57,7 @@ LISTAR TAREAS
 ```
 
 2. Presionar **Validar**. Debe verse “El programa es válido. Al validar no se guarda ningún cambio.”
-3. Mostrar el tablero y confirmar que **no** aparece “Demo final” (validar no escribe).
+3. Mostrar el tablero y confirmar que **no** aparece el título elegido (validar no escribe). Cambiar “Demo final” por un título nuevo en todas las líneas antes de iniciar: puede existir de una ejecución anterior.
 4. Presionar **Ejecutar** y mostrar los resultados por instrucción.
 5. Ir al tablero y confirmar que ahora sí aparece “Demo final” en `EN_PROGRESO`.
 6. Mostrar el error léxico:
@@ -124,8 +124,8 @@ Resultado esperado: `condicion: false`, `accion: null`, sin efectos.
 **Responsable sugerido:** Edwin, con apoyo de Miguel en la integración del optimizador.
 
 1. Explicar las dos optimizaciones:
-   - Condiciones constantes y código inalcanzable.
-   - Eliminación de cambios de estado redundantes en bloques lineales.
+   - Simplificación del control de una condición conocida verdadera.
+   - Eliminación de una acción inalcanzable cuando la condición se conoce falsa, conservando su resultado.
 2. Mostrar la prueba que compara IR sin optimizar y optimizada:
 
 ```sh
@@ -133,13 +133,13 @@ DATABASE_URL=postgresql://autotask:autotask_dev@localhost:5432/autotask \
   npm run test:e2e
 ```
 
-Señalar el caso **“compara ejecución de IR sin optimizar y optimizada preservando efectos”** (E2E 4).
+Señalar el caso **“compara ejecución de IR sin optimizar y optimizada preservando efectos”** (E2E 4); compara ambas técnicas.
 
 3. Explicar por qué es seguro: las operaciones observables son barreras; no se eliminan correos ni notificaciones.
 4. Explicar la transacción: si falla una operación antes del `COMMIT`, se revierte todo y no se envían correos.
 5. Explicar `partial: true`: si falla un despacho después del `COMMIT`, las tareas quedan y el correo puede quedar `incierto` o `no_procesado`; no se debe reintentar el programa completo.
 
-**Evidencia:** captura de la salida E2E 5/5 y del caso 4; captura o explicación del historial con `incierto`/`no_procesado` si se hizo la prueba.
+**Evidencia:** captura de la salida E2E 8/8 y del caso 4; explicar por qué no se borran transiciones intermedias observables.
 
 ### 2.5 Interfaz: consola, tablero e historial (1.5 min)
 
@@ -182,7 +182,7 @@ ENVIAR CORREO A "demo@ejemplo.com" MENSAJE "Correo de la demo final"
 
 **Responsable sugerido:** Miguel Ángel.
 
-1. Resumir lo cumplido: lenguaje, lexer, parser/AST, símbolos, semántica, IR, dos optimizaciones, ejecutor, PostgreSQL, SMTP, Docker y 120+5 pruebas.
+1. Resumir lo verificado: lenguaje, lexer, parser/AST, símbolos, semántica, IR, dos técnicas de optimización de condiciones, ejecutor, PostgreSQL, SMTP, Docker y 123+8 pruebas.
 2. Declarar límites con honestidad:
    - No hay LEDs/alarmas: es la opción 3 AutoTask.
    - No hay `REPETIR` (opcional en el PDF).
@@ -210,12 +210,31 @@ Guardar las imágenes con nombres claros, por ejemplo en `docs/evidencias/` o en
 | 7 | Error semántico | `TAREA_INEXISTENTE` o transición inválida | Consola |
 | 8 | Condicional verdadero | Acción ejecutada y notificación en historial | Consola + tablero |
 | 9 | Condicional falso | `condicion: false`, `accion: null` | Consola |
-| 10 | Optimizaciones | E2E 5/5, caso “IR sin optimizar vs. optimizada” | Terminal |
+| 10 | Optimizaciones | E2E 8/8, caso “IR sin optimizar vs. optimizada” | Terminal |
 | 11 | Historial | Operaciones, notificaciones y correos con filtros | Tablero |
 | 12 | Correo | Mensaje visible en Mailpit | Mailpit |
 | 13 | Persistencia | Tarea conservada tras `stop`/`start` | Terminal + tablero |
-| 14 | Pruebas | `npm test` 120/120 y E2E 5/5 | Terminal |
+| 14 | Pruebas | `npm test` 123/123 y E2E 8/8 | Terminal |
 | 15 | Git/Kanban | PRs fusionados, issues y tablero | GitHub |
+
+### Evidencia ya disponible frente a evidencia que aún falta
+
+[Capturas reales de Melody en el comentario del issue #45](https://github.com/Angixs-zz/ProyectoAutomatas/issues/45#issuecomment-7091763705) (tomadas sobre `76de0b3`): validar sin escritura, ejecución, tablero, historial, SI con notificación, correo visible en Mailpit, error semántico, vacío/error **simulados**, móvil y modo claro. Se pueden enlazar en la entrega; no volver a atribuirlas ni afirmar que muestran los arreglos posteriores.
+
+**Capturas aún necesarias:** (1) consola y tablero después de #50/#51 mostrando `CONSULTAR` con responsable correcto y fecha `2026-11-30`; (2) historial de programa rechazado rotulado «Programa rechazado» y simulación explícitamente rotulada; (3) errores léxico y sintáctico **en navegador**; (4) condicional falso en navegador; (5) comparación de **ambas** optimizaciones con resultados, estado e historial equivalentes tras la corrección; (6) prueba 123/123 y E2E 8/8 sobre el commit final, incluida persistencia tras reinicio; (7) pantalla final del Kanban con tarjetas y responsables; (8) revisión auténtica de PR si GitHub habilita permisos; (9) demostración en vivo y evidencia de que sucedió. Las capturas previas de Mailpit, éxito e historial **ya existen**; repetirlas sobre el commit final solo si se exige evidencia visual de esa versión.
+
+### Comandos listos para ensayo (puertos de este entorno)
+
+```sh
+POSTGRES_PORT=55432 docker compose up -d --build
+POSTGRES_PORT=55432 docker compose ps
+curl -fsS http://localhost:8080/api/salud
+npm test
+POSTGRES_PORT=55432 DATABASE_URL=postgresql://autotask:autotask_dev@localhost:55432/autotask npm run test:e2e
+curl -fsS http://localhost:8025/api/v1/messages
+```
+
+La E2E reinicia servicios y crea tareas; no correrla durante una interacción de la demo. Para el flujo interactivo abrir `http://localhost:8080`, sustituir **en todas las líneas** `Demo final` por un título único y seguir §2.2–2.6. No borrar el volumen ni la bandeja de Mailpit.
 
 ---
 
@@ -227,10 +246,10 @@ Distribución basada en las contribuciones verificables del repositorio (commits
 | --- | --- | --- | --- |
 | **Miguel Ángel** (`Angixs-zz`) | Arquitectura y contratos (#1/#21), integración del pipeline y API (#34), PostgreSQL (#35), corrección de `partial` (#30), E2E (#36), contrato API (#37), cierre de arquitectura (#38) | Apertura, arquitectura, cierre, coordinación | 2.5 min |
 | **Yareli** (`yareliyazmin16`) | Gramática (#2/#22), lexer (#3/#23), parser/AST (#4/#33) | Lenguaje, lexer, parser y errores | 2.5 min |
-| **Melody** (`Melody-Mendoza`) | Consola (#7/#25), tablero e historial (#8/#31), integración frontend (#16) | Interfaz, tablero e historial | 1.5 min |
-| **Diego** (`diegooash`) | Esquema y repositorio PostgreSQL (#5/#32), API (#6), notificaciones/SMTP (#14), integración API-motor (#15) | Persistencia, API y correo | 1.5 min |
+| **Melody** (`Melody-Mendoza`) | Consola (#7/#25), tablero e historial (#8/#31), integración frontend (#16), correcciones UI (#50) y capturas #45 | Interfaz, tablero e historial | 1.5 min |
+| **Diego** (`diegooash`) | Esquema y repositorio PostgreSQL (#5/#32), API (#6), notificaciones/SMTP (#14), integración API-motor (#15), pruebas API (#48) y evidencia SMTP (#49) | Persistencia, API y correo | 1.5 min |
 | **Ángel** (`Angel-2329`) | Tabla de símbolos (#9/#26), validación semántica (#10/#27), IR (#11/#29) | Semántica, condicional e IR | 2.5 min |
-| **Edwin** (`noeEdwin`) | Ejecutor (#12/#28), Docker (#17/#24), E2E (#18/#36); contrato de IR y optimizaciones (#13). La integración final del optimizador quedó en el PR #34 de Miguel. | Ejecutor, optimizaciones, Docker y `partial` | 2 min |
+| **Edwin** (`noeEdwin`) | Ejecutor (#12/#28), Docker (#17/#24), E2E (#18/#36), contrato IR (#13) y pruebas de optimizador/reinicio (#46/#47). La integración inicial del optimizador quedó en el PR #34 de Miguel. | Ejecutor, pruebas de optimización, Docker y `partial` | 2 min |
 
 > **Nota de honestidad:** el issue #13 (optimizaciones) estaba asignado a Edwin, pero el commit de integración del optimizador en `main` es de Miguel (`6b2fb3b`, PR #34). En la demo, Edwin presenta el contrato y la justificación; Miguel explica la integración. No se debe afirmar que una sola persona escribió todo el optimizador.
 

@@ -2,9 +2,10 @@
  * Optimizador de Representación Intermedia (IR) · [S3 · EX-2]
  * Aplica optimizaciones locales que preservan el comportamiento observable:
  * 1. Simplificación de condiciones constantes y eliminación de código inalcanzable.
- * 2. Eliminación de cambios de estado redundantes (dead store) en bloques lineales.
+ * 2. Eliminación de acciones inalcanzables bajo condiciones falsas.
+ * Los cambios de estado no se eliminan: cada transición se expone en resultados
+ * e historial persistente, incluso si otra transición la sobrescribe.
  */
-import { TRANSICIONES, ESTADOS_FINALES } from '../semantica/validador.js';
 
 function claveTarea(refTarea) {
   if (!refTarea) return null;
@@ -54,6 +55,10 @@ function simplificarCondiciones(instrucciones, aplicadas) {
           }
         } else {
           aplicadas.add('eliminacion_codigo_inalcanzable');
+          // La condición falsa también es un resultado observable del programa.
+          // Se elimina solo la acción, conservando evaluación, salto y etiqueta.
+          salida.push(clonarInstruccion(inst), clonarInstruccion(siguiente));
+          salida.push(clonarInstruccion(instrucciones[idxEtiqueta]));
         }
         i = idxEtiqueta + 1;
         continue;
@@ -92,75 +97,6 @@ function simplificarCondiciones(instrucciones, aplicadas) {
   return salida;
 }
 
-const OPS_BARRERA_BLOQUE = new Set([
-  'ETIQUETA',
-  'SALTAR_SI_FALSO',
-  'EVALUAR_ESTADO',
-  'CONSULTAR_TAREA',
-  'LISTAR_TAREAS',
-  'NOTIFICAR',
-  'ENVIAR_CORREO',
-]);
-
-function eliminarCambiosRedundantes(instrucciones, aplicadas) {
-  const eliminar = new Set();
-  const estadosConocidos = new Map();
-  let ultimoCambio = new Map();
-
-  for (let i = 0; i < instrucciones.length; i += 1) {
-    const inst = instrucciones[i];
-
-    if (OPS_BARRERA_BLOQUE.has(inst.op) || inst.condicional) {
-      ultimoCambio = new Map();
-      if (inst.op === 'ETIQUETA' || inst.op === 'SALTAR_SI_FALSO') {
-        estadosConocidos.clear();
-      }
-      continue;
-    }
-
-    if (inst.op === 'CREAR_TAREA' && inst.salidaRef) {
-      const clave = `tmp:${inst.salidaRef}`;
-      estadosConocidos.set(clave, 'PENDIENTE');
-      ultimoCambio.delete(clave);
-      continue;
-    }
-
-    if (inst.op === 'CAMBIAR_ESTADO') {
-      const clave = claveTarea(inst.tarea);
-      if (!clave) continue;
-
-      const previo = ultimoCambio.get(clave);
-      if (
-        previo &&
-        previo.estadoPrevio !== undefined &&
-        !ESTADOS_FINALES.includes(previo.estado) &&
-        TRANSICIONES[previo.estadoPrevio]?.includes(previo.estado) &&
-        TRANSICIONES[previo.estado]?.includes(inst.estado) &&
-        TRANSICIONES[previo.estadoPrevio]?.includes(inst.estado)
-      ) {
-        eliminar.add(previo.indice);
-        ultimoCambio.set(clave, {
-          indice: i,
-          estado: inst.estado,
-          estadoPrevio: previo.estadoPrevio,
-        });
-        estadosConocidos.set(clave, inst.estado);
-        aplicadas.add('eliminacion_cambios_estado_redundantes');
-        continue;
-      }
-
-      ultimoCambio.set(clave, {
-        indice: i,
-        estado: inst.estado,
-        estadoPrevio: estadosConocidos.get(clave),
-      });
-      estadosConocidos.set(clave, inst.estado);
-    }
-  }
-
-  return instrucciones.filter((_, idx) => !eliminar.has(idx));
-}
-
 /**
  * Optimiza un ProgramaIR sin mutar el original.
  * @param {object} programaIR
@@ -173,12 +109,11 @@ export function optimizarIR(programaIR) {
 
   const aplicadas = new Set(programaIR.metadatos?.optimizacionesAplicadas ?? []);
   const trasCondiciones = simplificarCondiciones(programaIR.instrucciones, aplicadas);
-  const trasRedundantes = eliminarCambiosRedundantes(trasCondiciones, aplicadas);
 
   return {
     tipo: 'ProgramaIR',
     version: programaIR.version ?? 1,
-    instrucciones: trasRedundantes,
+    instrucciones: trasCondiciones,
     metadatos: {
       ...programaIR.metadatos,
       totalInstruccionesOriginales:

@@ -1,10 +1,10 @@
 # AutoTask · ProyectoAutomatas
 
-Base inicial del proyecto integrador de Lenguajes y Autómatas II. AutoTask corresponde a la opción 3 de la consigna, enfocada en la automatización de tareas y procesos mediante instrucciones escritas.
+Aplicación integrada del proyecto de Lenguajes y Autómatas II. AutoTask corresponde a la opción 3 de la consigna, enfocada en la automatización de tareas y procesos mediante instrucciones escritas.
 
 El punto de partida es [TareasHogar en el commit `dfbc59b`](https://github.com/Angixs-zz/TareasHogar/commit/dfbc59bc014048cb72dc76ad32f896cdd86feabe), una aplicación web hecha con HTML, CSS y JavaScript.
 
-## Qué funciona en esta base
+## Calendario heredado
 
 - Calendario de tareas con turnos de fin de semana, filtros por persona y consulta del reparto.
 - Rotaciones independientes por tarea. Si una persona ya tiene una tarea asignada ese fin de semana, su siguiente turno se aplaza y se conserva. Las tareas se procesan por prioridad.
@@ -68,11 +68,7 @@ docker compose up --build
 
 Las variables disponibles se encuentran en `.env.example` (`APP_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`, `DATABASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `MAILPIT_UI_PORT`, `SMTP_FROM`).
 
-Los scripts `.sql` colocados en `db/init/` (`001_esquema.sql`, `002_datos_demo.sql`, `003_alinear_historial_notificaciones.sql`) se ejecutan automáticamente al inicializar el volumen de PostgreSQL por primera vez y mediante `aplicarMigraciones` al arrancar la aplicación. Para reiniciar desde cero incluyendo la base de datos:
-
-```sh
-docker compose down -v
-```
+Los scripts `.sql` colocados en `db/init/` (`001_esquema.sql`, `002_datos_demo.sql`, `003_alinear_historial_notificaciones.sql`) se ejecutan al inicializar PostgreSQL y mediante `aplicarMigraciones` al arrancar la aplicación. Para detener y volver a iniciar conservando datos: `docker compose stop` y `docker compose start`. **No borres volúmenes existentes.**
 
 ### Pruebas automatizadas y verificación en Mailpit
 
@@ -90,9 +86,11 @@ Con los contenedores levantados (`docker compose up -d --build`, o definiendo `P
 DATABASE_URL=postgresql://autotask:autotask_dev@localhost:5432/autotask npm run test:e2e
 ```
 
-(Si usaste `POSTGRES_PORT=55432`, ajusta el puerto en `DATABASE_URL`.)
+(Si usaste `POSTGRES_PORT=55432`, ajusta `DATABASE_URL` y exporta también `POSTGRES_PORT=55432`: E2E reinicia `app` y `postgres` sin borrar el volumen.)
 
 3. **Verificar el envío de correos en Mailpit:**
 
 - Abre [http://localhost:8025](http://localhost:8025) en el navegador después de ejecutar un comando `ENVIAR CORREO A "..." MENSAJE "..."` desde la consola web ([http://localhost:8080](http://localhost:8080)) o tras correr `npm run test:e2e`.
 - También puedes consultar la bandeja vía API: `curl http://localhost:8025/api/v1/messages`.
+
+Verificación tras los PR #46–#51: `npm test` **123/123** y `npm run test:e2e` **8/8** con PostgreSQL y Mailpit (PostgreSQL en puerto 55432); detalles en [la matriz](docs/matriz-requisitos.md). Los ejemplos `ENCENDER`/`APAGAR`/`ACTIVAR`/`DESACTIVAR` del PDF **no son comandos literales** de AutoTask. `REPETIR` no es obligatorio.

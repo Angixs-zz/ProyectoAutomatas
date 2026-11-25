@@ -85,12 +85,11 @@ El optimizador recibe un `ProgramaIR`, devuelve un nuevo `ProgramaIR` sin mutar 
 
 1. **Simplificación de condiciones constantes y eliminación de código inalcanzable:**
    - Si justo antes de `EVALUAR_ESTADO` el optimizador conoce con certeza el estado actual de `tarea` (por ejemplo, tras `CREAR_TAREA` vale `PENDIENTE` o tras un `CAMBIAR_ESTADO` incondicional previo vale `E`):
-     - Si la comparación es **siempre falsa**, se elimina todo el bloque (`EVALUAR_ESTADO`, `SALTAR_SI_FALSO`, la acción y `ETIQUETA`), conservando un registro equivalente de condicional falso si se requiere en la traza o evitando ejecutar código inalcanzable.
+      - Si la comparación es **siempre falsa**, se elimina la acción inalcanzable; se conservan evaluación, salto y etiqueta para emitir el resultado condicional falso.
      - Si la comparación es **siempre verdadera**, se eliminan `EVALUAR_ESTADO`, `SALTAR_SI_FALSO` y `ETIQUETA`, dejando la acción directa.
-2. **Eliminación de cambios de estado redundantes (dead store):**
-   - Si dentro del mismo bloque lineal (sin `ETIQUETA`, `SALTAR_SI_FALSO`, `EVALUAR_ESTADO`, `CONSULTAR_TAREA`, `LISTAR_TAREAS`, `NOTIFICAR` ni `ENVIAR_CORREO` intermedios) existen dos `CAMBIAR_ESTADO` consecutivos sobre la misma tarea (`A -> E1` seguido de `A -> E2`) donde `E1` no es un estado final que habría fallado y la transición directa hacia `E2` es válida según `TRANSICIONES`, puede conservarse únicamente el cambio final a `E2`.
+2. **Eliminación de código inalcanzable:** se retira únicamente la acción de un `SI` cuya condición se conoce falsa. No se elimina el resultado del `SI`.
 
-**Restricción de seguridad:** nunca eliminar ni reordenar `CONSULTAR_TAREA`, `LISTAR_TAREAS`, `NOTIFICAR` ni `ENVIAR_CORREO` que sí vayan a ejecutarse, ni ocultar errores de transición válidos.
+**Restricción de seguridad:** nunca eliminar ni reordenar efectos externos. Tampoco se eliminan cambios de estado sobrescritos: aunque el estado final coincida, cada transición produce un resultado y una entrada de historial observable. La antigua transformación de «dead store» fue retirada tras revisar este contrato.
 
 ---
 

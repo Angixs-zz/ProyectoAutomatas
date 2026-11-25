@@ -43,5 +43,5 @@
 
 - Los documentos conservan el texto original de cada responsable cuando existe; las correcciones y contrastes finales se agregan en secciones separadas.
 - Los estados de requisitos usan: **Cumplido**, **Cumplido (adaptado)**, **Parcial**, **Pendiente** y **No aplica**.
-- Las afirmaciones de pruebas se refieren a `npm test` (120/120) y `npm run test:e2e` (5/5) verificados sobre `main` antes de la entrega.
+- Las capturas de `docs/evidencias/01–04` son históricas (120/120 y 5/5). La verificación integrada posterior a los PR #46–#51 dio 123/123 y 8/8; ver [matriz](matriz-requisitos.md) para comandos y límites.
 - No se documentan como terminados los puntos que dependen de capturas, permisos de GitHub Projects o revisión humana.
